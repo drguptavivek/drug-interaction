@@ -402,7 +402,49 @@ It is perhaps two hours a year, but a missed declaration is a licence compliance
 failure, not a paperwork slip. Added to the Phase 7 handover checklist and to the
 risk register as [R30](09-risks.md).
 
-### 3.6.6 If this ever leaves India
+### 3.6.6 Obtaining it — **already done for this project**
+
+**Status: the Affiliate Licence is held and MLDS access is in place.** This
+removes what would otherwise have been the first blocker in Phase 0
+([Q28](10-open-questions.md#q28) closed). The procedure is recorded below because
+it will be needed again — by a second deploying site, and by any other Indian
+institution reusing this plan.
+
+Per NRCeS (`nrces.in/standards/snomed-ct`):
+
+| Step | |
+|---|---|
+| 1 | Register at MLDS, India landing page — `mlds.ihtsdotools.org/#/landing/IN` |
+| 2 | Create and activate the account |
+| 3 | Accept the **SNOMED CT Affiliate License Agreement (2023)** and request access |
+| 4 | **Download link available in 4–5 business days** |
+
+The 4–5 business day wait matters for anyone doing this fresh: it sits at the
+head of a serial chain — no licence → no release files → no unpacked RF2 → no
+coverage census. For this project that chain is already cleared, so Phase 0 can
+open directly on the downloads.
+
+**One check still outstanding: the national releases, not only the International
+Edition.**
+The NRCeS page describes the International Release files as what becomes
+available to the affiliate. The **Common Drug Codes for India (CDCI)** package —
+which this project depends on for the entire product layer
+([§3.4](#34-common-drug-codes-for-india-cdci--what-it-actually-is)) — is a
+separate national release, listed at `nrces.in/services/national-releases`.
+Confirm CDCI is available under the existing registration; an International
+Edition download does not imply access to the national packages. If it is not,
+request it now — it is the only remaining licensing item on the critical path.
+
+While there, capture the Affiliate License Agreement (2023) PDF verbatim into
+`licence.retrieved_text` with its retrieval date ([02 §2](02-data-model.md#2-provenance)) —
+it is the document every position in this chapter rests on.
+
+**Release cadence.** SNOMED CT International ships **biannually**, and CDCI is
+synchronous with it. That is the external clock this project's terminology runs
+on, and it is the natural cadence for the re-census (§3.6.5,
+[C6](11-challenges-to-the-brief.md#c6)).
+
+### 3.6.7 If this ever leaves India
 
 Not in scope, but the rules are worth recording before someone offers the
 artifact informally to a neighbour:

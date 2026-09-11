@@ -27,6 +27,7 @@ production code has been written. The documents below are the deliverable.
 | 11 | [Challenges to the brief](docs/plan/11-challenges-to-the-brief.md) | Constraints I believe are mistakes, with reasons |
 | 12 | [Terminology tooling](docs/plan/12-terminology-tooling.md) | Terminology server (build-time yes, runtime never); RxNorm's expanded role |
 | 13 | [HMIS-neutral integration](docs/plan/13-hmis-neutral-integration.md) | What changes when SCTIDs live in the HMIS and no adapter is in scope |
+| **14** | **[Phase 0 runbook](docs/plan/14-phase-0-runbook.md)** | **Start here to do the work** — ordered steps, owners, the go/no-go gate |
 
 ## Headline conclusions
 

@@ -140,4 +140,4 @@ Stated explicitly so it is not discovered later:
 | Pharmacogenomic interactions | Out of scope | — |
 | Multi-site rollout beyond the second pilot site | Operations, not build | ~1 week per site |
 | CDSCO medical-device regulatory submission | See [09](09-risks.md) R11 | unknown; legal-led |
-| Ongoing maintenance after handover | Quarterly re-census | ~0.5 person-week/quarter + 4 clinical-hours/quarter |
+| Ongoing maintenance after handover | Biannual terminology re-census on the SNOMED/CDCI release clock, lighter quarterly formulary check, annual Declaration of Use | ~0.5 person-week + 4 clinical-hours per SNOMED release; ~2 h/year for the declaration |

@@ -27,6 +27,8 @@ This phase exists to kill the project cheaply if the sources do not support it.
 **Entry criteria**
 - Named AIIMS executive sponsor and a named clinical pharmacology lead.
 - Institutional legal contact identified for licence review.
+- SNOMED Affiliate Licence and MLDS access — **already in place**, so the
+  4–5 business day registration wait is not on this project's critical path.
 
 **Work**
 1. Acquire every source, record SHA-256, record the exact licence text as
@@ -48,10 +50,11 @@ This phase exists to kill the project cheaply if the sources do not support it.
 **Exit criteria**
 - [ ] Licence memo signed by institutional legal, naming what may and may not be
       redistributed, with the CC1/CC2/CC7 decisions in [11](11-challenges-to-the-brief.md) resolved.
-- [ ] **SNOMED International Affiliate Licence obtained via NRCeS** ([Q28](10-open-questions.md#q28)).
-      Free — India is a Member country — but it gates Phase 2, because a
-      non-Affiliate may not copy SCTIDs into a database, which is what the
-      curation platform does.
+- [x] **SNOMED Affiliate Licence held, MLDS access in place** ([Q28](10-open-questions.md#q28)).
+      Phase 2 is unblocked and Phase 0 opens directly on the downloads.
+- [ ] **CDCI national release confirmed available** under the existing MLDS
+      registration — an International Edition download does not imply it. The
+      only remaining licensing item on the critical path.
 - [ ] **[Q29](10-open-questions.md#q29) asked of NRCeS**: does a `codes-only` deployment need
       its own site licence? Decides whether a primary-care rollout needs zero
       registrations or one per site.

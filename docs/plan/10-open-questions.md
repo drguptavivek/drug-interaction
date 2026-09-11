@@ -132,15 +132,19 @@ works regardless and tells you nothing about ECL. Full check-list in
 [12 §A5](12-terminology-tooling.md#a5-what-to-check-before-committing-phase-0-half-a-day).
 
 ### Q28
-**Is SNOMED International Affiliate registration in place, via MLDS?**
-Blocks: **Phase 2** — the curation tooling itself, not just distribution.
-Owner: Project lead + institutional legal.
-The CSNOServ sub-licence (clause 4.2) forbids a non-Affiliate from using it to
-*"add or copy SNOMED CT identifiers into any type of record system, database or
-document"* — which is exactly what the curation platform does. Affiliate
-registration is free of cost to Indian organisations (India is a Member
-Territory) and is a registration exercise, not a procurement one. It is also the
-route to the MLDS downloads for the India edition and CDCI. Do it in Phase 0.
+**~~Is SNOMED International Affiliate registration in place, via MLDS?~~ — CLOSED.**
+**Yes. The Affiliate Licence is held and MLDS access is in place.** The curation
+platform is therefore licensed to copy SCTIDs into a database (CSNOServ
+sub-licence clause 5), and Phase 2 is unblocked.
+
+Two consequences that are now live rather than future:
+
+- **CDCI access.** Confirm the Common Drug Codes for India national release is
+  available under the existing registration — an International Edition download
+  does not imply it. This is the only remaining licensing item on the critical
+  path ([08 §3.6.6](08-licensing.md#366-obtaining-it--already-done-for-this-project)).
+- **The annual Declaration of Use is already an obligation**, not a future one —
+  see [Q30](#q30). Due 15 January.
 
 ### Q22
 **Does the SNOMED release we will use ship a UNII map reference set?**
@@ -184,7 +188,9 @@ Design is unaffected: both profiles already exist.
 ### Q30
 **Who files the annual Declaration of Use, and is a deployment register being
 kept from the first deployment?**
-Blocks: Phase 7 handover; ongoing compliance.
+Blocks: Phase 7 handover; ongoing compliance. **Live now** — the licence is
+already held ([Q28](#q28)), so the declaration obligation already exists,
+independently of whether this project ships.
 Owner: Institutional owner (same person as [Q19](#q19)).
 Due **15 January** each year via NRCeS, reporting purpose of use, implementation
 status, end users/sublicensees, and the **number of applications and

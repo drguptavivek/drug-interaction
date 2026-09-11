@@ -67,6 +67,98 @@ shasum -a 256 snomed-releases/SnomedCT_*.zip
 Then add or update the matching entry in `sources.lock` with `version`, `sha256`,
 `licence` and `redistributable: false`.
 
+## Inspection recipe — answers three open questions in ~20 minutes
+
+These run against unpacked RF2 on your laptop. They assume standard RF2 column
+order; sanity-check with `head -1 <file>` first, since a wrong field index gives
+a confidently wrong count rather than an error.
+
+Set a base path once:
+
+```bash
+INTL=snomed-releases/SnomedCT_InternationalRF2_.../Snapshot
+CDCI=snomed-releases/<CDCI package>/Snapshot
+```
+
+### Q22 — is there a UNII map reference set?
+
+The one that decides how load-bearing RxNorm is
+([12 §B1](../docs/plan/12-terminology-tooling.md#b1-why-rxnorm-may-be-load-bearing-not-optional)).
+
+```bash
+ls "$INTL"/Refset/Map/                                   # what map refsets ship at all
+grep -i "unii" "$INTL"/Terminology/sct2_Description_Snapshot-en_*.txt | head
+# refset ids actually populated in the simple map file (field 5 = refsetId):
+cut -f5 "$INTL"/Refset/Map/der2_sRefset_SimpleMapSnapshot_*.txt | sort -u
+# then look each id up to see what it is:
+grep -F -f <(cut -f5 "$INTL"/Refset/Map/der2_sRefset_SimpleMapSnapshot_*.txt | sort -u) \
+     "$INTL"/Terminology/sct2_Description_Snapshot-en_*.txt | cut -f5,8 | sort -u
+```
+
+A UNII map present → the SNOMED-side UNII anchor derives natively. Absent → it
+must come via RxNorm (`SCTID → RXCUI → UNII`), which makes RxNorm structurally
+necessary rather than optional.
+
+### Q2 / Q4 — what is in the India (CDCI) package?
+
+Semantic-tag distribution over active FSNs. Fields: `$3` active, `$7` typeId
+(`900000000000003001` = FSN), `$8` term.
+
+```bash
+awk -F'\t' '$3==1 && $7=="900000000000003001" {
+  if (match($8, /\([^)]*\)$/)) print substr($8, RSTART+1, RLENGTH-2)
+}' "$CDCI"/Terminology/sct2_Description_Snapshot*.txt | sort | uniq -c | sort -rn
+```
+
+Expect `(medicinal product)`, `(clinical drug)`, `(real clinical drug)`,
+`(product)` — and **few or no `(substance)` rows**. That is the confirmation that
+the extension supplies the product layer while the International Release supplies
+substances, which is the good outcome for the mapping design.
+
+Same command against `$INTL` gives the substance count — the size of spoke A's
+target space.
+
+### Module dependency — do the two packages actually pair?
+
+```bash
+cat "$CDCI"/Refset/Metadata/der2_ssRefset_ModuleDependencySnapshot*.txt | column -t -s$'\t'
+```
+
+`sourceEffectiveTime` / `targetEffectiveTime` state which International version
+the extension was built against. A mismatched pair loads with dangling
+references that surface much later as unresolvable concepts.
+
+### Relationship counts the design depends on
+
+Fields: `$3` active, `$8` typeId.
+
+```bash
+for t in 738774007:"Is modification of" \
+         127489000:"Has active ingredient" \
+         762949000:"Has precise active ingredient" \
+         732943007:"Has basis of strength substance"; do
+  id=${t%%:*}; name=${t#*:}
+  n=$(awk -F'\t' -v id="$id" '$3==1 && $8==id' \
+        "$INTL"/Terminology/sct2_Relationship_Snapshot*.txt \
+        "$CDCI"/Terminology/sct2_Relationship_Snapshot*.txt 2>/dev/null | wc -l)
+  printf '%-38s %s\n' "$name" "$n"
+done
+```
+
+`Is modification of` gives the size of the salt/ester/prodrug candidate set that
+Phase 1 must classify ([04 §3.1](../docs/plan/04-etl-pipeline.md#31-substance-graph-and-closure)).
+The three ingredient relationships confirm product decomposition works as
+designed — if `Has active ingredient` is near zero in the CDCI package, the FDC
+decomposition assumption needs revisiting.
+
+### Combi packs
+
+CDCI excludes them. Worth sizing the gap against the drug master locally, since
+every combi-pack row needs decomposing into component products
+([13 §4.3](../docs/plan/13-hmis-neutral-integration.md#43-drug-master-coding-qa-report)).
+
+---
+
 ## Phase 0 questions this folder will answer
 
 Two open questions can be settled just by unpacking a release and looking

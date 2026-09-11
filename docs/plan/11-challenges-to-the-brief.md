@@ -192,11 +192,18 @@ the design:
 1. `ddi_unresolved_total` and `ddi_pairs_not_evaluated_total` in production. A
    rising unresolved rate *is* the formulary drifting, measured directly, at zero
    marginal cost.
-2. A **quarterly re-census**: re-run the coverage census against the current
-   formulary, add whatever is new to the curation queue. ~0.5 person-week plus
-   ~4 clinical hours per quarter. Plus the source-checksum change gate
-   ([04 §2](04-etl-pipeline.md#2-acquire--source-pinning)), which forces a human
-   to look whenever an upstream source moves.
+2. A **re-census on a real external clock**. SNOMED CT International ships
+   **biannually** and CDCI is synchronous with it, so tie the terminology
+   re-census to the release rather than to an arbitrary quarter: re-run the
+   coverage census against the current formulary, and pick up whatever new CD/RCD
+   concepts the CDCI release adds — each release makes previously uncodeable
+   branded rows codeable, which is the drug master's maintenance path too
+   ([13 §5](13-hmis-neutral-integration.md#5-the-drug-master-coding-exercise)).
+   ~0.5 person-week plus ~4 clinical hours per release. Keep a lighter
+   **quarterly formulary check** in between, since CDSCO approvals and
+   institutional formulary changes do not wait for SNOMED. Plus the
+   source-checksum change gate ([04 §2](04-etl-pipeline.md#2-acquire--source-pinning)),
+   which forces a human to look whenever an upstream source moves.
 
 **A third thing the brief missed, and so did my first draft.** There *is* a
 mandatory recurring obligation, just not a technical one: the **annual

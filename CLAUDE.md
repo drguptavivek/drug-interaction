@@ -88,8 +88,9 @@ Other licensed sources get sibling directories, already gitignored: `ddinter/`,
 
 ## Where the work picks up: Phase 0
 
-Phase 0 exists to kill the project cheaply if the sources don't support it.
-Nothing downstream should be built until its gates are met (`01-phases.md`).
+**Follow [`docs/plan/14-phase-0-runbook.md`](docs/plan/14-phase-0-runbook.md)** —
+ordered steps P1–P11 with owners, durations and the go/no-go gate. Summary of
+what matters:
 
 - [ ] **Coverage census** — 150 molecules from the AIIMS formulary (50
       high-volume, 50 random, 50 NTI/QT/CYP-perpetrator), checked for presence in
@@ -106,12 +107,14 @@ Nothing downstream should be built until its gates are met (`01-phases.md`).
 - [ ] **Q24** — **ask to see the AIIMS drug master.** It's a spreadsheet, and
       looking at it collapses most of the remaining uncertainty in the plan:
       row count, coding level, FDC share.
-- [ ] **Q28 — SNOMED International Affiliate registration via MLDS.** Free to
-      Indian organisations (India is a Member Territory) and administrative, but
-      it gates **Phase 2**: the CSNOServ sub-licence (clause 4.2) bars a
-      non-Affiliate from copying SCTIDs into a database, which is what the
-      curation platform does. It is also the route to the MLDS downloads for the
-      India edition and CDCI. Do it first.
+- [x] **Affiliate Licence held, MLDS access in place, release files downloaded
+      locally.** Phase 2 is unblocked. Remaining licensing item: confirm **CDCI**
+      is available under the same registration — an International Edition
+      download does not imply it.
+- [ ] **Inspect the local RF2** — the recipe in
+      [`snomed-releases/README.md`](snomed-releases/README.md) answers Q22
+      (UNII map refset?), confirms the product/substance split, and sizes the
+      `Is modification of` classification job. ~20 minutes.
 - [ ] **Q27 — does CSNOServ's API support ECL?** Half a day against
       `nrces.in/bhts/api/v1/csnoserv/`. If yes, the Snowstorm standup (2.0
       eng-weeks) and the 16 GB build machine both disappear. Check the **API**;
