@@ -12,7 +12,9 @@ retrieved is stored in `licence.retrieved_text` for exactly that reason.
 |---|---|---|---|---|
 | **DDInter 2.0** | CC BY-NC-SA 4.0 | Yes, non-commercial | **Yes, but only under CC BY-NC-SA 4.0** | Drives the whole artifact licensing question — §2 |
 | **SNOMED CT International** | SNOMED Affiliate Licence (free at point of use in India as a Member country, via the NRC) | Yes, with an affiliate licence | **Identifiers: yes, in context. Descriptions/FSNs: restricted to licensees** | §3 |
-| **SNOMED CT India edition / CDC-India** | NRCeS national licence terms | Yes, for Indian entities | Restricted; national-licence terms govern | §3 |
+| **SNOMED CT India edition** | NRCeS national licence terms | Yes, for Indian entities | Restricted; national-licence terms govern | §3 |
+| **Common Drug Codes for India (CDCI)** — Terminology Integrated Package | Distributed via **MLDS** under the same affiliate/national terms | Yes, for Indian entities | Restricted | §3.4 |
+| **CSNOtk / CSNOServ / CSNOFinder / CSNOLib / CSNOCtrl** (the *software*) | **Apache-2.0**, © 2014 C-DAC | Yes | Yes | §3.5 — but the SNOMED **content** it serves is governed separately |
 | **ONCHigh high-priority list** | Published in the peer-reviewed literature; licence status of the *list as data* is unclear | Yes | **Unclear — Phase 0 question** | Treat as restricted until confirmed; a ~15-entry list can be independently re-derived from cited primary literature if needed |
 | **CredibleMeds QTDrugs** | CredibleMeds Terms of Use — registration required, personal/institutional use | Yes, per site, by the licensee | **No** | §4 — do not ship |
 | **DrugBank (academic/full)** | Academic licence agreement | Only under a signed agreement | **No** | §5 — do not use for rules |
@@ -143,15 +145,65 @@ curation (the UI must not offer "copy FSN" as a one-click action).
 The artifact builder takes `--profile` and the `verify` stage asserts that a
 `codes-only` build contains no SNOMED-derived strings.
 
+### 3.4 Common Drug Codes for India (CDCI) — what it actually is
+
+Confirmed (August 2026 release note, via NRCeS/MLDS):
+
+| | |
+|---|---|
+| Form | A **Terminology Integrated Package** — RF2, distributed through MLDS |
+| Contents | Generic medicines, **supplier** concepts, and **branded** medicine concepts |
+| Coverage claim | With the SNOMED CT International Release, covers all medicines **except devices, surgical implants and combi packs** |
+| Cadence | Synchronous with the SNOMED CT International Edition (the August 2026 package pairs with the August 2026 International Edition) |
+| Recent increment | 134 Clinical drug (CD) and 892 Real clinical drug (RCD) concepts added, driven by national programmes |
+
+This settles [Q4](10-open-questions.md#q4) favourably: CDCI is real SNOMED
+drug-model content with `has active ingredient` /
+`has precise active ingredient` / `has basis of strength substance` structure,
+not a CSV of product names. Product decomposition works as designed, and the FDC
+parsing project I had budgeted as a downside risk does not arise for covered
+products.
+
+Two caveats that are now design inputs rather than unknowns:
+
+- **Combi packs are excluded.** A combi pack (several distinct dose forms in one
+  pack — H. pylori kits, TB kits, peri-operative kits) has no single concept, so
+  such a drug master row cannot be coded to one code and must be decomposed into
+  its component products by the coding exercise. This is a named check in
+  `ddictl qa-coding` ([13 §4.3](13-hmis-neutral-integration.md#43-drug-master-coding-qa-report)).
+- **Branded (RCD) coverage is being built out incrementally.** An increment of
+  892 RCD concepts, targeted at national programmes, is not the same as covering
+  a tertiary hospital's branded formulary. Expect a mix: some drug master rows
+  code to RCD, many to substance level.
+
+### 3.5 CSNOServ: Apache-2.0 software, separately licensed content
+
+C-DAC's toolkit **CSNOtk** — `CSNOLib`, `CSNOFinder`, `CSNOServ`, `CSNOCtrl` — is
+**Apache-2.0** (© 2014 C-DAC). The SNOMED CT content it serves is governed by a
+separate C-DAC-issued SNOMED CT sub-licence, whose clause 4.2 forbids a
+non-Affiliate from using it to *"add or copy SNOMED CT identifiers into any type
+of record system, database or document"*.
+
+That is precisely what the curation platform does. So **SNOMED International
+Affiliate registration (free to Indian organisations, via MLDS) is a prerequisite
+for using CSNOServ or BHTS in the curation workflow at all** — not merely for
+distributing the result. It gates Phase 2, not Phase 7. Detail and the other
+clauses in [12 §A7](12-terminology-tooling.md#a7-the-csnoserv-sub-licence-constrains-how-we-may-use-it).
+
+Clause 5.1 also places responsibility for fees for deployment in a **Non-Member
+Territory** on the Affiliate. Deployment within India is free of cost; offering
+the artifact to a neighbouring country needs that check first, and the deployment
+guide should say so before someone offers it informally.
+
 ### 3.3 The India edition dependency
 
-Open question for Phase 0 ([Q2](10-open-questions.md#q2)): the brief assumes the
-India edition is where the substance concepts live. My expectation is that
-substance concepts are International Release core content and the India extension
-adds Indian *products* and dose forms on top. If that is right, it is good news —
-the substance spoke targets are internationally stable concepts, and the India
-extension dependency is confined to the product layer, which is exactly where we
-want the local variability to be.
+**[Q2](10-open-questions.md#q2) is now answered.** The CDCI package description —
+generic, supplier and branded *medicine* concepts, used *alongside* the
+International Release to cover all medicines — confirms the expectation:
+substance concepts are International Release core content, and the Indian
+extension adds the *product* layer. This is the good outcome. The substance spoke
+targets are internationally stable concepts, and the India extension dependency
+is confined to products, which is exactly where the local variability belongs.
 
 The startup validation must then check against the **combined** release
 (International + India extension) and record both release identifiers, not just

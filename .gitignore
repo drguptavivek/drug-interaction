@@ -1,2 +1,63 @@
+# ─── Licensed source data — MUST NEVER be committed ───────────────────────────
+# This repository is PUBLIC. SNOMED CT, DDInter, RxNorm/UMLS and CredibleMeds
+# content are all restricted in ways that a public commit would breach
+# (SNOMED Affiliate Licence, CC BY-NC-SA, UMLS Metathesaurus Licence,
+# CredibleMeds ToU). See docs/plan/08-licensing.md.
+#
+# These rules are a COMPLIANCE CONTROL, not tidiness. Do not "fix" a missing
+# data file by committing it. Sources are pinned by SHA-256 in sources.lock and
+# fetched locally — that is the reproducibility mechanism (docs/plan/04).
+
 snomed-releases/*
+!snomed-releases/.gitkeep
+!snomed-releases/README.md
+
+ddinter/
+rxnorm/
+umls/
+credible-meds/
+cdc-india/
+drugbank/
+
+# Belt and braces: the same content unpacked somewhere unexpected
+SnomedCT_*/
+*_RF2_*.zip
+sct2_*.txt
+der2_*.txt
+RXN*.RRF
+MRCONSO.RRF
+*.rf2
+*.rf2.zip
+
+# Any local scratch or extract area
+data/
+scratch/
+tmp/
+
+# ─── Build outputs ────────────────────────────────────────────────────────────
+*.ddi
+*.ddi.sig
+/dist/
+/build/
+ddid
+ddictl
+
+# ─── Secrets and local config ─────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!**/testdata/**/*.key
+overlay.local.yaml
+
+# ─── Tooling ──────────────────────────────────────────────────────────────────
 .DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+.idea/
+.vscode/
+*.log

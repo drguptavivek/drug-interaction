@@ -46,14 +46,13 @@ the difference between "the service said nothing about this drug" and "the
 service said this drug is safe".
 
 ### Q2
-**Does the SNOMED CT India edition contain substance concepts, or only products
-and dose forms layered on the International Release?**
-Blocks: Phase 1 loader design, startup validation scope.
-Owner: Terminologist.
-Consequence: if substances are International core, spoke A targets are
-internationally stable concepts and the India dependency is confined to the
-product layer — the better outcome. The startup check must then validate against
-*both* release identifiers, not just the India edition as the brief states.
+**~~Does the SNOMED CT India edition contain substance concepts?~~ — ANSWERED.**
+**No — it supplies the product layer.** The CDCI package provides generic,
+supplier and branded medicine concepts *for use alongside* the International
+Release, which supplies substances. This is the good outcome: spoke A targets are
+internationally stable concepts and the Indian dependency is confined to
+products. Consequence retained — the startup check validates against **both**
+release identifiers, not just the India edition as the brief states.
 
 ### Q3
 **Does DDInter 2.0 actually contain drug–food interactions, drug–disease
@@ -67,13 +66,20 @@ Default if unanswered: descope to drug–drug, plus structural moiety-duplicatio
 detection clearly labelled as structurally derived.
 
 ### Q4
-**Is CDC-India obtainable in bulk, with structured composition (ingredient,
-salt, strength, basis of strength), or only as an online lookup?**
-Blocks: Phase 1 product ingestion, Phase 3 FDC tooling estimate.
-Owner: Engineering + NRCeS contact.
-Default if unanswered: seed `product` from the AIIMS formulary master and attach
-CDC-India codes opportunistically. The hub-and-spoke design isolates this, but
-the FDC decomposition estimate triples if composition must be parsed from names.
+**~~Is CDC-India obtainable in bulk with structured composition?~~ — ANSWERED.**
+**Yes.** Common Drug Codes for India (CDCI) is an RF2 **Terminology Integrated
+Package** distributed via MLDS, synchronous with the SNOMED CT International
+Edition. It carries real SNOMED drug-model structure, so decomposition uses the
+same `has active ingredient` relationships as any other product. The FDC parsing
+project budgeted as a downside risk does not arise for covered products.
+
+Two residual items, now design inputs rather than unknowns:
+- **Combi packs are excluded** from CDCI. Such drug master rows must be
+  decomposed into component products — a named check in `ddictl qa-coding`.
+- **Branded (RCD) coverage is incremental** and national-programme-driven
+  (e.g. +134 CD, +892 RCD in the August 2026 package). Expect a tertiary
+  formulary to be partly RCD-coded and largely substance-coded, which is what the
+  `coding[]` / `ingredients[]` request model already accommodates.
 
 ### Q5
 **May CredibleMeds QTDrugs data be redistributed in a non-commercial
@@ -104,24 +110,37 @@ Default: proceed for government and academic deployment as the brief scopes;
 state the private-sector boundary plainly in the deployment guide.
 
 ### Q20
-**Does NRCeS already hold an Ontoserver licence, or any other FHIR terminology
-server, that we could use for curation?**
-Blocks: Phase 1 tooling choice.
-Owner: Terminologist + NRCeS contact.
-Recommendation: Snowstorm (Apache-2.0, free, what SNOMED International runs)
-unless an Ontoserver licence already exists. **Do not procure one for this
-project** — the benefit over Snowstorm does not justify a purchase here.
-See [12 §A3](12-terminology-tooling.md#a3-which-server).
-
 ### Q21
-**Does NRCeS expose a hosted Snowstorm or FHIR terminology endpoint to Indian
-affiliates?**
-Blocks: nothing, but it could remove the ops cost of a self-hosted server for
-interactive curation.
-Owner: Terminologist.
-If yes: use it for curation. Still pin RF2 archives for the build — a hosted
-endpoint can change release under you mid-project, which is fine for a human
-browsing and fatal for a reproducible build.
+**~~Ontoserver? Does NRCeS expose a hosted endpoint?~~ — SUPERSEDED.**
+Both answered by the national services. **BHTS** — the Bharat Health Terminology
+Service — is live at `nrces.in/bhts` with a FHIR-compliant API at
+`/bhts/api/v1/csnoserv/`, and `nrces.in/bhts/browser/` is a **CSNOFinder**
+search-and-browse UI. **CSNOServ** has been available since 2014 as a locally
+deployable service, part of the **Apache-2.0** CSNOtk toolkit, carrying the
+Indian extensions (AYUSH, CDCI) pre-integrated. Ontoserver is out of
+consideration. See [12 §A3](12-terminology-tooling.md#a3-which-server--revised-after-the-nrces--c-dac-findings).
+
+### Q27
+**Does CSNOServ's API support ECL?**
+Blocks: whether Snowstorm is needed at all.
+Owner: Terminologist + engineering. **~Half a day against the live endpoint.**
+ECL was the whole case for standing up Snowstorm ([12 §A2](12-terminology-tooling.md#a2-build-and-curation-time-yes-and-it-is-better-than-my-first-draft)).
+If CSNOServ does ECL — via FHIR `ValueSet/$expand` with an ECL filter, or
+natively — the 2.0 eng-weeks budgeted for a Snowstorm standup and the 16 GB build
+machine both disappear. **Check the API, not the browser**: CSNOFinder browsing
+works regardless and tells you nothing about ECL. Full check-list in
+[12 §A5](12-terminology-tooling.md#a5-what-to-check-before-committing-phase-0-half-a-day).
+
+### Q28
+**Is SNOMED International Affiliate registration in place, via MLDS?**
+Blocks: **Phase 2** — the curation tooling itself, not just distribution.
+Owner: Project lead + institutional legal.
+The CSNOServ sub-licence (clause 4.2) forbids a non-Affiliate from using it to
+*"add or copy SNOMED CT identifiers into any type of record system, database or
+document"* — which is exactly what the curation platform does. Affiliate
+registration is free of cost to Indian organisations (India is a Member
+Territory) and is a registration exercise, not a procurement one. It is also the
+route to the MLDS downloads for the India edition and CDCI. Do it in Phase 0.
 
 ### Q22
 **Does the SNOMED release we will use ship a UNII map reference set?**

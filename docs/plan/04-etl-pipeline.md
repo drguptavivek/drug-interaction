@@ -53,6 +53,12 @@ same `artifact_sha256`.
   sha256: "…"
   licence: SNOMED-IN-NATIONAL
   redistributable: false
+- source: CDC_INDIA                   # Common Drug Codes for India (CDCI)
+  version: "2026-08"                 # Terminology Integrated Package, RF2 via MLDS
+  sha256: "…"
+  licence: SNOMED-IN-NATIONAL
+  redistributable: false
+  pairs_with: SNOMED_INT@2026-08     # package is synchronous with the Intl Edition
 - source: RXNORM
   version: "2025-03"
   sha256: "…"
@@ -93,7 +99,7 @@ mechanism referenced in [C6](11-challenges-to-the-brief.md#c6).
 |---|---|
 | DDInter | Split the drug list from the pair list. **Assert** the drug and pair counts and record them; the brief's ~2,310 / ~302,000 are hypotheses (see [C3](11-challenges-to-the-brief.md#c3)). Canonicalise each pair to `(lo, hi)` by DDInter ID, drop exact duplicates, report non-exact duplicates (same pair, different severity) rather than silently picking one. |
 | SNOMED RF2 | Snapshot only, not Full. Load `concept`, `description`, `relationship`, `sct2_RelationshipConcreteValues`, plus the UNII/ATC simple map refsets if present. Keep `active=0` rows — inactivity is a fact the service needs, not noise to filter. |
-| CDC-India | Product codes with composition. Retain original strings. |
+| CDC-India (CDCI) | RF2 Terminology Integrated Package: generic, supplier and branded (CD/RCD) medicine concepts. Load as a SNOMED extension, not as a code list — decomposition uses the same `has active ingredient` relationships as any other product. **Excludes devices, surgical implants and combi packs**; a combi pack drug master row has no single concept and must be decomposed into component products. Retain original strings. |
 | UNII / GSRS | Preferred substance name, all synonyms, and the salt→parent relationship. The latter is what allows UNII comparison at a consistent level (see [03 §5](03-candidate-ranking.md#5-anchor-agreement-semantics)). |
 | RxNorm | Filter to `SAB=RXNORM` at ingest — proprietary source atoms must never reach the artifact. Load `IN`/`PIN`/`MIN` and the `has_precise_ingredient`/`form_of` graph, SNOMEDCT_US atoms, DrugBank cross-references and UNII attributes. Brand term types (`BN`, `SBD`) are discarded at ingest, not merely unused. |
 | WHO ATC | Full index to level 5; retain **all** codes per substance. |

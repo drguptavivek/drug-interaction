@@ -57,8 +57,8 @@ DM-110877 | AUGMENTIN 625 TAB | Amoxicillin 500 mg + Clavulanic acid 125 mg | ta
 | Option | What is coded | Availability for Indian products | Consequence for us |
 |---|---|---|---|
 | **A — substance SCTIDs** | One substance code per active ingredient (`395821009 \|Pantoprazole\|`) | **High.** Substances are International Release core content and stable | Simplest and most robust. But an FDC row needs *several* codes, and route/form must come from the HMIS's own fields |
-| **B — product SCTIDs** | One product concept per drug master row | **Low.** Indian brands will not exist as SNOMED product concepts unless CDC-India supplies them ([Q4](10-open-questions.md#q4)) | Ideal when available: strength, form and route come with the code. Cannot be relied on |
-| **C — CDC-India codes** | The ABDM-sanctioned Indian medicine code | Unknown ([Q4](10-open-questions.md#q4)) | Equivalent to B for our purposes; we decompose via the same product tables |
+| **B — product SCTIDs** | One product concept per drug master row | **Partial, and better than first assumed.** CDCI *does* supply branded (RCD) and generic (CD) medicine concepts in RF2 ([08 §3.4](08-licensing.md#34-common-drug-codes-for-india-cdci--what-it-actually-is)) — but branded coverage is being built out incrementally and is targeted at national programmes | Ideal when available: strength, form and route come with the code. Covers part of a tertiary formulary, not all of it |
+| **C — CDCI codes** | The ABDM-sanctioned Indian medicine code | Same as B — CDCI *is* the SNOMED India drug extension, so B and C are one option | Equivalent to B; decomposed via the same product tables |
 
 **Realistic expectation: mostly A, some B/C where available, and a long tail of
 rows that resolve to neither.** Planning for A as the common case and treating
@@ -219,6 +219,7 @@ checks that only make sense in aggregate:
 | Rows coded to a **salt** where the moiety was intended | The commonest coding error |
 | Rows whose code pulls > 3,000 interaction pairs | Coded to a class or grouper concept, not a substance |
 | FDC rows with fewer codes than the composition string implies | A dropped component — [R5](09-risks.md), the highest-frequency safety gap |
+| **Combi-pack rows coded to a single concept** | CDCI excludes combi packs, so a single code on an H. pylori / TB / peri-operative kit is necessarily wrong. The row must be decomposed into component products |
 | Two drug master rows with identical composition but different codes | Internal inconsistency |
 | Codes not in the coding target set | Coded to something we cannot use |
 | Codes inactive in the KB's release | The re-coding worklist from §3 |
