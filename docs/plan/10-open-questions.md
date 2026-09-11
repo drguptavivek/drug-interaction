@@ -75,6 +75,47 @@ Owner: Institutional legal.
 Default: proceed for government and academic deployment as the brief scopes;
 state the private-sector boundary plainly in the deployment guide.
 
+### Q20
+**Does NRCeS already hold an Ontoserver licence, or any other FHIR terminology
+server, that we could use for curation?**
+Blocks: Phase 1 tooling choice.
+Owner: Terminologist + NRCeS contact.
+Recommendation: Snowstorm (Apache-2.0, free, what SNOMED International runs)
+unless an Ontoserver licence already exists. **Do not procure one for this
+project** — the benefit over Snowstorm does not justify a purchase here.
+See [12 §A3](12-terminology-tooling.md#a3-which-server).
+
+### Q21
+**Does NRCeS expose a hosted Snowstorm or FHIR terminology endpoint to Indian
+affiliates?**
+Blocks: nothing, but it could remove the ops cost of a self-hosted server for
+interactive curation.
+Owner: Terminologist.
+If yes: use it for curation. Still pin RF2 archives for the build — a hosted
+endpoint can change release under you mid-project, which is fine for a human
+browsing and fatal for a reproducible build.
+
+### Q22
+**Does the SNOMED release we will use ship a UNII map reference set?**
+Blocks: the anchor design's SNOMED-side derivation path.
+Owner: Terminologist.
+Why it matters more than it looks: the third-anchor check is the control that
+detects spoke disagreement, and it needs UNII computed *independently* down the
+SNOMED side. If no UNII refset exists, that derivation has to come from RxNorm
+(`SCTID → RXCUI → UNII`), which makes RxNorm structurally necessary rather than
+optional. See [12 §B1](12-terminology-tooling.md#b1-why-rxnorm-may-be-load-bearing-not-optional).
+Default if unanswered: ingest RxNorm regardless and treat it as the primary
+derivation.
+
+### Q23
+**Does DDInter publish DrugBank cross-references, and does the RxNorm release
+carry `DRUGBANK` as a source vocabulary?**
+Blocks: retriever R8, the structural `DDInter → DrugBank → RXCUI → SCTID` path.
+Owner: Engineering.
+If both hold, spoke B links to spoke A with no string matching at all — much
+stronger evidence than any name-similarity score. If either fails, R8 degrades
+to name matching and nothing else in the design changes.
+
 ## Blocking Phase 1
 
 ### Q8

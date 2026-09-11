@@ -12,12 +12,14 @@ which is roughly 4× longer and is a scheduling problem, not an effort problem.
 | 0 | Source acquisition, checksums, licence dossier | 1.0 | High |
 | 0 | Coverage census (tooling + analysis) | 1.5 | High |
 | 0 | Artifact/licensing distribution design | 0.5 | Medium |
-| 1 | SNOMED RF2 loader, substance graph, closures | 2.0 | High |
+| 1 | SNOMED RF2 loader, substance graph, closures (reduced: ECL replaces hand-rolled SQL) | 1.0 | High |
+| 1 | Snowstorm standup (Intl + India extension), ECL expansion cache, CI wiring | 2.0 | Medium |
+| 1 | RxNorm ingest (`SAB=RXNORM` filter, IN/PIN graph, DrugBank/UNII cross-refs) | 0.5 | High |
 | 1 | DDInter / UNII / ATC / openFDA / ONCHigh normalization | 1.5 | Medium |
 | 1 | Anchor computation and agreement views | 1.0 | Medium |
 | 1 | Reproducible-build harness | 0.5 | High |
 | 2 | PostgreSQL schema, triggers, projection rebuild | 1.5 | High |
-| 2 | Candidate ranking service (7 retrievers + scorer) | 3.0 | **Low** |
+| 2 | Candidate ranking service (8 retrievers + scorer, incl. the RxNorm structural path) | 3.5 | **Low** |
 | 2 | Curation API (Go) + Keycloak roles | 1.5 | High |
 | 2 | Svelte curation UI (queue, evidence, review, release) | 2.5 | Medium |
 | 2 | Release assembly + diff report | 0.5 | High |
@@ -39,11 +41,11 @@ which is roughly 4× longer and is a scheduling problem, not an effort problem.
 | 6 | Clinical safety case support (hazard log tooling, traceability) | 0.5 | Medium |
 | 7 | Pilot support, deployment docs, runbook, handover | 2.5 | Medium |
 | all | CI, packaging, release engineering, security review | 2.0 | Medium |
-| | **Subtotal** | **42.0** | |
+| | **Subtotal** | **44.0** | |
 
 **Low-confidence items, and why:**
 
-- *Candidate ranking (3.0)* — seven retrievers over heterogeneous sources, plus
+- *Candidate ranking (3.5)* — eight retrievers over heterogeneous sources, plus
   a calibration loop. Could be 2.0 if SNOMED synonym coverage of Indian
   molecule names is good; could be 5.0 if it is poor and N6 orthographic
   handling turns into a research problem.
@@ -55,7 +57,12 @@ which is roughly 4× longer and is a scheduling problem, not an effort problem.
   involvement and a change request). **This is the single largest scheduling
   unknown in the plan** and is [Q1](10-open-questions.md#q1).
 
-**Engineering range: 34 (optimistic) – 42 (planning) – 58 (pessimistic).**
+**Engineering range: 35 (optimistic) – 44 (planning) – 60 (pessimistic).**
+
+The +2.0 against the first draft is the terminology-server and RxNorm decisions
+in [12](12-terminology-tooling.md): +2.0 for Snowstorm and the ECL cache, +1.0
+for RxNorm, −1.0 saved on hand-written closure and search SQL. Both buy
+correctness on the parts of the design most likely to fail quietly.
 
 The optimistic case assumes CDC-India ships structured composition, the HMIS
 speaks REST, and SNOMED synonym coverage is good. Plan to 42.
@@ -95,6 +102,7 @@ really goes, and it is the part that determines whether the system is used.
 | Role | Allocation |
 |---|---|
 | Backend engineer (Go + Python) | 1.0 FTE for 7 months |
+| Build machine for Snowstorm | 16 GB RAM, ~50 GB disk — request in Phase 0 |
 | Full-stack engineer (Svelte + Go, ETL support) | 0.8 FTE for 5 months |
 | Clinical pharmacologist (checker, tier owner) | 0.2 FTE for 5 months |
 | Residents (makers, 2–3 rotating) | ~0.3 FTE aggregate for 3 months |

@@ -200,6 +200,14 @@ invisible, but it also cannot take the hospital's DDI checking offline.
 degradation. It defaults to **off**, and the choice is recorded in the audit log
 at startup so a later incident review can see which posture was configured.
 
+**`ddid` links no terminology client and has no terminology server
+configuration key.** This is an explicit non-goal. A terminology server
+(Snowstorm or similar) is a build- and curation-time dependency only — see
+[12 Part A](12-terminology-tooling.md#part-a--terminology-server). "We already
+run Snowstorm, just call it for the startup check" is a reasonable-sounding
+suggestion that would silently destroy the offline property, and it is easiest to
+refuse by having nowhere to configure it.
+
 Withdrawal without network access is handled by a `withdrawn.txt` file shipped
 with each release listing superseded-and-withdrawn version strings; sites that
 never update never learn of a withdrawal, which is an honest limitation of an

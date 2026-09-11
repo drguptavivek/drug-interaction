@@ -20,7 +20,8 @@ retrieved is stored in `licence.retrieved_text` for exactly that reason.
 | **openFDA / FDA label data** | US Government work, public domain | Yes | Yes | Evidence display only, not a rule source |
 | **UNII / FDA GSRS** | Public domain | Yes | Yes | Anchor |
 | **WHO ATC index** | WHO copyright; use permitted, redistribution of the full index restricted | Yes for internal mapping | **Codes yes, full index no** | Ship codes, not the index |
-| **RxNorm** | UMLS licence (free, registration) | Yes | Identifiers yes, with attribution | Secondary only |
+| **RxNorm** (`SAB=RXNORM`) | UMLS Metathesaurus Licence (free, UTS registration) | Yes | RXCUIs and RxNorm term types: yes, with attribution | §5A — promoted to a structural anchor |
+| **RxNorm, proprietary source vocabularies** (MMSL, GS, NDDF, MDDB, …) | Source-specific, restricted | Present in the release | **No** | Filtered out at ingest, not merely unused |
 
 ## 2. The CC BY-NC-SA ShareAlike obligation — and why the KB must not be embedded
 
@@ -209,6 +210,27 @@ as a rule source. If the census shows a genuinely large gap, the honest options
 are an institution-authored rule set (fully ours, freely publishable) or a
 licensed commercial source — not a licence-breaching workaround.
 
+## 5A. RxNorm
+
+Two things ship in one download and must be separated at ingest.
+
+| | RxNorm proper (`SAB=RXNORM`) | Proprietary source vocabularies in the same release |
+|---|---|---|
+| Examples | RXCUIs, `IN`/`PIN`/`MIN`/`SCD` term types, RxNorm normal forms | MMSL, GS, NDDF, MDDB |
+| Redistributable | Yes, with NLM attribution | **No** |
+| Used here | Structural anchor path, IN/PIN collapse cross-check, UNII derivation | Nothing |
+
+Mechanism: filter to `SAB=RXNORM` at ingest — proprietary atoms never enter the
+staging database at all, so they cannot leak into an artifact by oversight. The
+`verify` stage asserts it independently. Brand term types (`BN`, `SBD`) are
+discarded for a separate reason: they are a false-evidence source for an Indian
+formulary ([12 §B4](12-terminology-tooling.md#b4-the-tightening-ingredient-level-only-never-brand)),
+not a licensing problem.
+
+Why RxNorm's role grew: it may be the only available derivation of the
+SNOMED-side UNII anchor, and it provides an independent opinion on salt/moiety
+collapse. See [12 Part B](12-terminology-tooling.md#part-b--rxnorm).
+
 ## 6. What may be published openly
 
 | Artifact | Licence | Publishable |
@@ -255,6 +277,8 @@ Contains SNOMED CT content, used under the SNOMED CT Affiliate Licence via
   trademark of SNOMED International. This artifact may only be used by
   parties holding a valid SNOMED CT licence.
 
+Contains RxNorm content courtesy of the U.S. National Library of Medicine
+  (RXCUIs and RxNorm term types only; no proprietary source vocabulary content).
 Contains UNII data and FDA drug label data, which are in the public domain.
 Contains ATC codes, © World Health Organization Collaborating Centre for
   Drug Statistics Methodology.

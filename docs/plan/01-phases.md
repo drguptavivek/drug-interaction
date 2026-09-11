@@ -69,6 +69,10 @@ a smaller, better-defined and still clinically valuable system.
 
 **Work**
 - Python ETL stages `acquire` → `stage` → `normalize` (see [04](04-etl-pipeline.md)).
+- Stand up **Snowstorm** with the International Release + India extension, for
+  ECL, description search and the terminologist's browser. Build the ECL
+  expansion cache and wire it into CI. See [12 Part A](12-terminology-tooling.md#part-a--terminology-server).
+  Needs a 16 GB build machine — request it in Phase 0.
 - Load SNOMED RF2 snapshot (International + India extension) into PostgreSQL:
   `concept`, `description`, `relationship`, `refset` tables, release-tagged.
 - Materialise the substance sub-hierarchy (`105590001 | Substance |` descendants)
@@ -79,6 +83,8 @@ a smaller, better-defined and still clinically valuable system.
   (732943007), plus dose form and route.
 - Normalize DDInter into `ddinter_drug` and `ddinter_interaction`.
 - Load UNII/GSRS names, WHO ATC index, openFDA label extracts, ONCHigh list.
+- Load RxNorm (`SAB=RXNORM` only): `IN`/`PIN`/`MIN` graph, SNOMEDCT_US atoms,
+  DrugBank cross-references, UNII attributes. See [12 Part B](12-terminology-tooling.md#part-b--rxnorm).
 - Build the anchor tables.
 
 **Exit criteria**
@@ -90,6 +96,11 @@ a smaller, better-defined and still clinically valuable system.
 - [ ] `Is modification of` closure has no cycles; any found are reported, not
       silently broken.
 - [ ] Anchor disagreement rate measured and reported.
+- [ ] Every ECL expression used by the build is named, cached and checksummed;
+      a cache miss fails CI.
+- [ ] Whether the release ships a UNII map refset is determined, and the
+      SNOMED-side UNII derivation path is confirmed to work by one route or the
+      other ([Q22](10-open-questions.md#q22)).
 
 ---
 

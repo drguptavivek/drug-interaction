@@ -25,6 +25,7 @@ production code has been written. The documents below are the deliverable.
 | 09 | [Risk register](docs/plan/09-risks.md) | Risks, mitigations, owners, triggers |
 | 10 | [Open questions](docs/plan/10-open-questions.md) | Decisions required before build starts |
 | 11 | [Challenges to the brief](docs/plan/11-challenges-to-the-brief.md) | Constraints I believe are mistakes, with reasons |
+| 12 | [Terminology tooling](docs/plan/12-terminology-tooling.md) | Terminology server (build-time yes, runtime never); RxNorm's expanded role |
 
 ## Headline conclusions
 
@@ -48,13 +49,22 @@ production code has been written. The documents below are the deliverable.
 6. **The dominant risk is neither software nor terminology — it is DDInter
    coverage of the Indian formulary.** Measure it in Phase 0 before committing
    to the rest.
+7. **Run a terminology server (Snowstorm) for curation and build; never at
+   runtime.** ECL and proper description search are worth the operational cost.
+   The build consumes a checksummed ECL expansion cache, not a live server, so
+   reproducibility survives. `ddid` has nowhere to configure one, deliberately.
+8. **RxNorm deserves a bigger role than "interoperability".** Its structural path
+   (`DDInter → DrugBank → RXCUI → SCTID`) needs no string matching, its `IN`/`PIN`
+   split is an independent check on the riskiest decision in the design, and it
+   may be the only way to derive the SNOMED-side UNII anchor. Its *brand* layer,
+   by contrast, should be prohibited outright.
 
 ## Scale of the work
 
 | | Person-weeks |
 |---|---|
-| Engineering | 34–42 |
-| Clinical curation and departmental liaison | 7–10 |
+| Engineering | 35–44 |
+| Clinical curation and departmental liaison | 7–9.3 |
 | **Calendar, 2 engineers + part-time clinical panel** | **~7 months** |
 
 Full breakdown in [07](docs/plan/07-effort.md).

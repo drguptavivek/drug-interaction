@@ -19,7 +19,7 @@ has no uptime requirement, and it is allowed to be slow.
 | `acquire` | pinned `sources.lock` | raw files + SHA-256 | yes | checksum match or hard fail |
 | `stage` | raw files | `raw.*` tables, untouched content | yes | row counts asserted |
 | `normalize` | `raw.*` | `stg.*`, typed, deduplicated | yes | pure function of `raw.*` |
-| `link` | `stg.*` | anchor tables, substance graph, closures | yes | pure |
+| `link` | `stg.*` + ECL expansion cache | anchor tables, substance graph, closures | yes | pure; ECL results come from the cache, never a live server |
 | `candidates` | `stg.*` + department submissions | ranked candidate sets | yes | `tool_version` recorded |
 | `compose` | approved proposals | `mapping_projection`, applicable rules | yes | pure function of the append-only log |
 | `build` | composed tables | `kb-<version>.ddi` | yes | byte-identical for the same inputs |
@@ -53,6 +53,11 @@ same `artifact_sha256`.
   sha256: "…"
   licence: SNOMED-IN-NATIONAL
   redistributable: false
+- source: RXNORM
+  version: "2025-03"
+  sha256: "…"
+  licence: UMLS-METATHESAURUS
+  redistributable: partial          # SAB=RXNORM yes; proprietary source atoms no
 - source: UNII
   version: "2025-03"
   sha256: "…"
@@ -90,6 +95,7 @@ mechanism referenced in [C6](11-challenges-to-the-brief.md#c6).
 | SNOMED RF2 | Snapshot only, not Full. Load `concept`, `description`, `relationship`, `sct2_RelationshipConcreteValues`, plus the UNII/ATC simple map refsets if present. Keep `active=0` rows — inactivity is a fact the service needs, not noise to filter. |
 | CDC-India | Product codes with composition. Retain original strings. |
 | UNII / GSRS | Preferred substance name, all synonyms, and the salt→parent relationship. The latter is what allows UNII comparison at a consistent level (see [03 §5](03-candidate-ranking.md#5-anchor-agreement-semantics)). |
+| RxNorm | Filter to `SAB=RXNORM` at ingest — proprietary source atoms must never reach the artifact. Load `IN`/`PIN`/`MIN` and the `has_precise_ingredient`/`form_of` graph, SNOMEDCT_US atoms, DrugBank cross-references and UNII attributes. Brand term types (`BN`, `SBD`) are discarded at ingest, not merely unused. |
 | WHO ATC | Full index to level 5; retain **all** codes per substance. |
 | openFDA | Extract only the label sections plausibly relevant: `drug_interactions`, `contraindications`, `warnings`. Used as corroborating evidence displayed to curators, **not** as a rule source — free-text label mining produces rules nobody can defend at a mortality review. |
 | ONCHigh | ~15 drug-class pairs. Expand class→member using SNOMED substance descendants, then review the expansion by hand. Class expansion is where "always alert" lists quietly become 400 alerts. |
@@ -100,6 +106,12 @@ mechanism referenced in [C6](11-challenges-to-the-brief.md#c6).
 substances      := descendants_of(105590001 |Substance|)
 modification    := { (a,b) : a -[738774007 Is modification of]-> b }
 ```
+
+These sets are produced by **ECL expressions evaluated against an ephemeral,
+version-pinned Snowstorm instance** imported from the same RF2 archives, with
+every expansion written to a checksummed cache that the build consumes. A cache
+miss in CI is a hard failure, never a silent server call. Rationale and the full
+integration pattern: [12 §A4](12-terminology-tooling.md#a4-reproducibility--the-constraint-that-shapes-the-integration).
 
 Cycle detection on `modification` is mandatory and failures are reported, never
 auto-broken. The transitive closure is computed but **not used for automatic
@@ -112,6 +124,12 @@ collapse** — it produces the candidate set only, and every edge is classified:
 | `prodrug` | ATC-5 differs from parent, or an openFDA/DrugBank-Open flag, or a curated prodrug list | **no_collapse**, review |
 | `complex` | `ferric carboxymaltose`, `iron sucrose`, polyvalent-cation patterns | flagged, review |
 | `unknown` | anything else | blocked from band A; hard queue |
+
+RxNorm's `IN`/`PIN` split is an independent, human-curated opinion on this same
+question and is used as a cross-check: agreement raises confidence, disagreement
+(RxNorm calls it a distinct ingredient; SNOMED calls it a modification) is a
+strong ester/prodrug signal that blocks auto-collapse. See
+[12 §B2](12-terminology-tooling.md#b2-rxnorm-as-an-independent-check-on-the-riskiest-decision).
 
 This table is the operational form of [C4](11-challenges-to-the-brief.md#c4). The
 heuristics are imperfect *by design* — their job is to route work to the right
