@@ -55,15 +55,16 @@ products. Consequence retained — the startup check validates against **both**
 release identifiers, not just the India edition as the brief states.
 
 ### Q3
-**Does DDInter 2.0 actually contain drug–food interactions, drug–disease
-interactions and therapeutic duplication?**
-Blocks: scope, and the Phase 6/7 stakeholder expectations.
-Owner: Clinical pharmacology lead + engineering.
-See [C3](11-challenges-to-the-brief.md#c3). My expectation is that DDInter is
-drug–drug only. If stakeholders have been promised the other three, either a
-source must be found or the scope must be reduced explicitly and in writing.
-Default if unanswered: descope to drug–drug, plus structural moiety-duplication
-detection clearly labelled as structurally derived.
+**~~Does DDInter 2.0 actually contain drug–food, drug–disease and therapeutic
+duplication data?~~ — ANSWERED: yes, all three.**
+857 DFI records over 29 foods; 8,359 DDSI records over 472 diseases; 6,033
+therapeutic duplication records over 317 combination drugs and 96 pharmacological
+classes. Plus 302,516 DDI records over 2,310 drugs with 8,398 distinct mechanism
+and management descriptions — the brief's figures were exact.
+
+My challenge ([C3](11-challenges-to-the-brief.md#c3)) is
+withdrawn. Scope is *larger* than the drug–drug-only plan, not smaller. Modelling
+and cost for each content type: [15](15-content-types.md).
 
 ### Q4
 **~~Is CDC-India obtainable in bulk with structured composition?~~ — ANSWERED.**
@@ -200,35 +201,36 @@ maintained from day one — reconstructing it later is far harder.
 See [08 §3.6.5](08-licensing.md#365-annual-declaration-of-use--a-recurring-obligation-the-plan-had-missed).
 
 ### Q31
-**Does DDInter's bulk download cover all 14 ATC first levels, or only 8?**
-Blocks: **the whole project.** This is the coverage question in its sharpest
-form.
-Owner: Engineering + clinical pharmacology. **Half a day.**
+**Does the bulk download expose the full database, or a subset of it?** — *narrowed, and much less alarming.*
+Blocks: how the KB is built, not whether the project is viable.
+Owner: Engineering. **Half a day.**
 
-The download page at `ddinter.scbdd.com` lists 8 files — A, B, D, H, L, P, R, V
-— missing **C, G, J, M, N, S**. Those are cardiovascular, anti-infectives,
-nervous system, musculoskeletal, genito-urinary and sensory organs: the classes
-containing most CYP perpetrators, most narrow-therapeutic-index drugs, and most
-QT prolongers.
+**The content question is settled.** DDInter's own mechanism documentation works
+through examples involving lovastatin and ketoconazole (C, J), rifampin and
+verapamil (J, C), benzodiazepines and opioids (N), NSAIDs (M), beta-blockers (C),
+lithium and methotrexate (N, L). Those classes are unambiguously *in the
+database*. So the missing letters on the download page are a **packaging**
+question, not a coverage hole in the resource.
 
-**Check `ddinter2.scbdd.com` first** — that is DDInter 2.0; `ddinter.scbdd.com`
-is 1.0, and the observed file set may simply be the older release's.
+What is still to check, on `ddinter2.scbdd.com/download/`:
 
-If the gap is real on 2.0 as well: pairs survive when *either* partner is in a
-present class, so what is lost is pairs with **both** partners in missing classes
-— azole × statin, SSRI × tramadol, phenytoin × carbamazepine, amiodarone ×
-haloperidol. Fewer pairs than 6-of-14 implies, but concentrated in the severe
-ones, which makes the [P7](14-phase-0-runbook.md#p7--coverage-census--the-gate)
-NTI/QT stop condition the binding constraint.
+- [ ] Are there files for **C, G, J, M, N, S**? The 8-file set observed at
+      `ddinter.scbdd.com` is the 1.0 site.
+- [ ] Are there separate downloads for **DFI, DDSI and therapeutic duplication**,
+      or only DDI?
+- [ ] Do the per-file record counts sum to the documented 302,516?
 
-Default if the gap is confirmed: this is a **re-scope trigger**, not something to
-engineer around. The honest options are a curated high-priority-list service
-(ONCHigh + institution-authored rules), an institution-authored rule set for the
-missing classes, or a licensed commercial source.
+If the download really is a subset, the options are to ask the authors for the
+full set (a reasonable request for a non-commercial academic deployment), or to
+check whether per-drug page access is permitted under CC BY-NC-SA. Re-scoping is
+a last resort now, not the expected outcome.
 
 ### Q32
-**Does the DDInter bulk CSV carry mechanism and management text, or only drug
+**Does the DDInter bulk CSV carry the mechanism and management text, or only drug
 pairs and a severity level?**
+*(The text **exists** — 8,398 distinct mechanism and management descriptions for
+DDIs, 430 for DFIs, 3,300 for DDSIs. The only question is whether the bulk CSV
+ships it.)*
 Blocks: the clinical usefulness of every finding; the `RULE` section of the
 artifact ([04 §6](04-etl-pipeline.md#6-artifact-format)); the `mechanism` and
 `management` response fields ([06 §1](06-api-contracts.md#1-post-v1interactionscheck)).

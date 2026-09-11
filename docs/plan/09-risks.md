@@ -10,7 +10,7 @@ month, even though the latter is more visible to a steering committee.
 
 | ID | Risk | L | I | Score | Mitigation | Early warning |
 |---|---|---|---|---|---|---|
-| **R1** | **DDInter coverage is poor.** Two forms: molecules common in India absent; **and — now partly observed — whole ATC first levels missing from the bulk download** (C, G, J, M, N, S on the 1.0 site), which removes pairs where both partners are cardiovascular, anti-infective, neuro or musculoskeletal. | **5** | 5 | **25** | [Q31](10-open-questions.md#q31) checked against **ddinter2.scbdd.com** first — the observation is from the 1.0 site. Phase 0 census *before* committing, reported **per ATC first level** not in aggregate. Explicit `ingredient_coverage` and a `not_evaluated` outcome, so absence is never reported as safety. Stop condition at < 70% NTI/QT coverage. Fallback: re-scope to a curated high-priority-list service. | Census results; `ddi_unresolved_total` and `ddi_pairs_not_evaluated_total` in production |
+| **R1** | **DDInter coverage of the Indian formulary is poor** — molecules common in India, and Indian FDCs, absent from a 2,310-drug resource. (The feared ATC-class gap turned out to be a *download packaging* question, not a content hole — the database demonstrably covers C, J, N, M. [Q31](10-open-questions.md#q31).) | 4 | 5 | **20** | Phase 0 census *before* committing, reported **per ATC first level** not in aggregate (cheap, and it would catch a packaging gap too). Explicit `ingredient_coverage` and a `not_evaluated` outcome, so absence is never reported as safety. Stop condition at < 70% NTI/QT coverage. Fallback: re-scope to a curated high-priority-list service. | Census results; `ddi_unresolved_total` and `ddi_pairs_not_evaluated_total` in production |
 | **R2** | **Alert fatigue.** Interruptive tier too broad; clinicians click through everything, including the alerts that matter. | 4 | 5 | **20** | Shadow mode before go-live. ≤ 2 interruptive/100 orders as a gate. Structured `overrideReasons` as the feedback signal. Override rate > 80% is a documented stop condition that halts rollout. | Shadow-mode volumes; override rate in pilot |
 | **R3** | **Prodrug/ester wrongly collapsed to parent moiety**, producing false alerts or, worse, false reassurance. | 3 | 5 | **15** | `derivation_kind` classification; ester/prodrug default to `no_collapse`; every collapse through maker-checker; band-A blocked on `unknown` ([C4](11-challenges-to-the-brief.md#c4)). | Batch consistency check: salts with differing `Is modification of` parents |
 | **R4** | **Route-inappropriate alerts** (topical, ophthalmic, inhaled) drive clinicians to disable the system. | 4 | 3 | 12 | Route as a first-class product attribute; applicability predicate defaulting to systemic × systemic; `EXC_LOCAL_ROUTE` seeded ([C11](11-challenges-to-the-brief.md#c11)). | Departmental suppression requests clustering on topical products |
@@ -58,7 +58,7 @@ month, even though the latter is more visible to a steering committee.
 
 ## Top five by score
 
-1. **R1** — DDInter coverage, now partly observed rather than hypothetical (25)
+1. **R1** — DDInter coverage of the Indian formulary (20)
 2. **R2** — Alert fatigue (20)
 3. **R5** — FDC decomposition gaps (16)
 4. **R7** — Validation set never collected (16)

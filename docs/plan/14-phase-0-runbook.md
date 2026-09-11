@@ -115,11 +115,10 @@ path**
 [Q3](10-open-questions.md#q3) — the scope question. **This step has grown teeth:
 an initial look at the download page shows a likely serious coverage gap.**
 
-**First, check you are on the right site.** DDInter 2.0 is at
-**`ddinter2.scbdd.com`**; `ddinter.scbdd.com` is version 1.0. The 8-file
-download set described below appears to be the 1.0 set. Everything under
-[Q31](10-open-questions.md#q31) may look different on the 2.0 site — check there
-before drawing any conclusion.
+**Files download from `ddinter2.scbdd.com` (note the `2`).** Run the inspection
+recipe in [`ddinter/README.md`](../../ddinter/README.md) — it answers
+[Q31](10-open-questions.md#q31) and [Q32](10-open-questions.md#q32) directly from
+the files, in about twenty minutes.
 
 - [ ] **ATC first-level completeness** ([Q31](10-open-questions.md#q31)). The
       observed download set has 8 files — A, B, D, H, L, P, R, V — and is

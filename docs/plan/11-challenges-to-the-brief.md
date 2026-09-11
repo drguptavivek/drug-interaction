@@ -65,47 +65,52 @@ turns out to be permitted.
 ---
 
 ## C3
-### DDInter probably does not contain drug–food, drug–disease or duplication data
+### ~~DDInter probably does not contain drug–food, drug–disease or duplication data~~ — **WITHDRAWN. I was wrong.**
 
 **In the brief:** *"DDInter 2.0 … ~302,000 DDI records over 2,310 drugs, with
 severity, mechanism descriptions and management text; also drug–food
 interactions, drug–disease interactions and therapeutic duplication."*
 
-**Problem.** My understanding is that DDInter is a drug–**drug** interaction
-resource: drug pairs with severity, mechanism and management. Drug–food,
-drug–disease and therapeutic duplication are the content categories that
-distinguish *commercial* interaction databases. I cannot verify this from here
-and I may be wrong, but the claim should not be load-bearing without checking.
+**I challenged this as a likely scope error. The brief was accurate — on every
+point, including the counts.** DDInter 2.0's published statistics:
 
-The record counts should likewise be treated as hypotheses to assert at ingest,
-not facts — the ETL records actual counts in `source_release.row_counts` and
-compares them on every rebuild.
+| Content | Records | Supporting detail |
+|---|---|---|
+| **DDI** | **302,516** over **2,310** approved drugs | 8,398 distinct mechanism descriptions and management recommendations |
+| **DFI** (drug–food) | **857**, involving **29 foods** | 430 mechanism/management descriptions |
+| **DDSI** (drug–disease) | **8,359**, involving **472 diseases** | 3,300 detailed interaction and management records |
+| **Therapeutic duplication** | **6,033**, over 317 combination drugs and 96 pharmacological classes | each with a specific warning and note |
 
-**Why it matters.** If stakeholders have been told the service will cover four
-content categories and the source supplies one, that discovers itself in Phase 6
-in front of clinicians, which is the worst possible moment. It also changes the
-effort estimate materially: sourcing drug–disease content is a separate project
-(+6–10 eng-weeks, +4 clinical-weeks, *and a source*).
+Extracted from 16,028 literature sources. The brief's "~302,000 records over
+2,310 drugs" was exact, not approximate.
 
-**Recommendation.** Phase 0 verification ([Q3](10-open-questions.md#q3)). If
-confirmed, descope explicitly and in writing. Note that exact-moiety therapeutic
-duplication can still be detected *structurally* at near-zero cost — worth doing,
-provided it is labelled as structurally derived rather than presented as sourced
-knowledge.
+**Where my reasoning went wrong.** I inferred from the general shape of the field
+— drug–food, drug–disease and duplication content being the usual dividing line
+between free and commercial interaction databases — rather than from DDInter's
+own documentation. That inference was reasonable as a prior and wrong as a
+conclusion, and I stated it as "blocking (scope)", which was too strong for
+something I had not checked. The correct handling would have been to route it to
+Phase 0 without also asserting an expected answer.
 
-**Update — a second, larger problem with the same source.** The bulk download
-appears to ship only **8 of the 14 ATC first levels** (missing C, G, J, M, N, S),
-which is a coverage question rather than a content-type question and is
-potentially fatal rather than merely descoping. See
-[Q31](10-open-questions.md#q31). Also unresolved: whether the bulk CSV carries
-mechanism and management text at all, or only pair and severity
-([Q32](10-open-questions.md#q32)). Both are observations from `ddinter.scbdd.com`
-(version 1.0) and must be re-checked against `ddinter2.scbdd.com` before any
-conclusion.
+**Consequences, all of them favourable:**
 
-**Severity: blocking (scope), and possibly blocking (viability).**
+1. Scope is **larger** than the drug–drug-only plan I wrote. DFI, DDSI and
+   therapeutic duplication are all sourced, not aspirational — see
+   [15](15-content-types.md) for how each is modelled and what it costs.
+2. The effort exclusion in [07 §4](07-effort.md#4-what-is-not-in-the-estimate)
+   ("+6–10 eng-weeks **plus a source**") loses its hard part. There is a source.
+3. DDInter publishes a **structured mechanism taxonomy** — absorption,
+   distribution, metabolism, excretion, synergy, antagonism, others, unknown —
+   not just free text. That turns out to be worth more than the extra content
+   ([15 §2](15-content-types.md#2-the-mechanism-taxonomy-is-the-most-valuable-part)).
+4. Its severity scale (Major / Moderate / Minor / Unknown, on DRUGDEX criteria)
+   matches the `ddi_severity` enum in [02 §10](02-data-model.md#10-interaction-rules-and-alert-tiering) exactly. No change needed.
 
----
+**What remains open** is narrower and different: whether the *bulk download*
+exposes the full database or only part of it ([Q31](10-open-questions.md#q31)),
+and whether the CSV carries the mechanism and management text or only pair and
+severity ([Q32](10-open-questions.md#q32)). Those are packaging questions about a
+database whose contents are now documented, not doubts about the contents.
 
 ## C4
 ### Salt→moiety collapse must not be fully automated from `Is modification of`

@@ -12,7 +12,9 @@ snomed-releases/*
 !snomed-releases/.gitkeep
 !snomed-releases/README.md
 
-ddinter/
+ddinter/*
+!ddinter/.gitkeep
+!ddinter/README.md
 rxnorm/
 umls/
 credible-meds/

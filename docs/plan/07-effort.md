@@ -133,10 +133,10 @@ Stated explicitly so it is not discovered later:
 
 | Excluded | Why | Rough size if added |
 |---|---|---|
-| Drug–disease and drug–food interactions | Dependent on [C3](11-challenges-to-the-brief.md#c3); probably not in DDInter | +6–10 eng-weeks, +4 clinical-weeks, **plus a source** |
+| Drug–food, drug–disease, therapeutic duplication | **Now in scope** — all three exist in DDInter ([15](15-content-types.md)). Not in the 46.5 figure above. | +6.0 eng-weeks, ~+0.5 clinical for duplication + DFI + renal/hepatic DDSI; full problem-list DDSI a further +6.0/+3.0 |
 | Dose- and renal-function-dependent rules | Not phase 1; contract fields reserved | +8 eng-weeks, +6 clinical-weeks |
 | Allergy/cross-sensitivity checking | Different knowledge domain entirely | separate project |
-| Duplicate therapy beyond exact moiety match | Needs a class hierarchy decision | +3 eng-weeks |
+| ~~Duplicate therapy beyond exact moiety match~~ | DDInter supplies 96 pharmacological classes and 6,033 records — see [15 §3](15-content-types.md#3-therapeutic-duplication) | +2.0 eng-weeks |
 | Pharmacogenomic interactions | Out of scope | — |
 | Multi-site rollout beyond the second pilot site | Operations, not build | ~1 week per site |
 | CDSCO medical-device regulatory submission | See [09](09-risks.md) R11 | unknown; legal-led |

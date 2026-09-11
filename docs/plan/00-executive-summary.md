@@ -108,7 +108,7 @@ Detail and reasoning in [11](11-challenges-to-the-brief.md). Summary:
 |---|---|---|---|
 | C1 | KB "embedded" in the Go binary | ShareAlike attaches to the distributed binary. Ship a signed sidecar. | **Blocking — legal** |
 | C2 | CredibleMeds TdP list shipped in the artifact | Redistribution almost certainly not permitted. Per-site licensee overlay. | **Blocking — legal** |
-| C3 | DDInter "also has drug–food, drug–disease, therapeutic duplication" | I believe DDInter 2.0 is drug–drug only. If scope depends on the other three, the source is wrong. Verify in Phase 0. | **Blocking — scope** |
+| ~~C3~~ | ~~DDInter "also has drug–food, drug–disease, therapeutic duplication"~~ | **WITHDRAWN — I was wrong.** All three exist (857 DFI / 8,359 DDSI / 6,033 duplication) and the brief's DDI counts were exact. See [11 C3](11-challenges-to-the-brief.md#c3) and [15](15-content-types.md). | — |
 | C4 | Salt→moiety collapse "derived, not hand-curated" | `Is modification of` covers esters and prodrugs. Derive *candidates*; adjudicate. Internally inconsistent with the maker-checker principle stated elsewhere in the same brief. | **High — clinical safety** |
 | C5 | Startup validation "failing loudly on mismatch" | Fail the release in CI. At runtime, degrade with a banner and per-code `stale_code` status. A CDS binary that won't boot is a worse outcome. | **High — availability** |
 | C6 | "No continuous monitoring process" | Correct for SNOMED substance concepts; wrong for the Indian formulary, which changes with every CDSCO approval and FDC launch. Needs a lightweight quarterly re-census, not a monitoring service. | **Medium** |

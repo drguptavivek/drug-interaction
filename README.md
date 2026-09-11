@@ -28,6 +28,7 @@ production code has been written. The documents below are the deliverable.
 | 12 | [Terminology tooling](docs/plan/12-terminology-tooling.md) | Terminology server (build-time yes, runtime never); RxNorm's expanded role |
 | 13 | [HMIS-neutral integration](docs/plan/13-hmis-neutral-integration.md) | What changes when SCTIDs live in the HMIS and no adapter is in scope |
 | **14** | **[Phase 0 runbook](docs/plan/14-phase-0-runbook.md)** | **Start here to do the work** — ordered steps, owners, the go/no-go gate |
+| 15 | [The four content types](docs/plan/15-content-types.md) | DDI, duplication, drug–food, drug–disease; the mechanism taxonomy and what it derives |
 
 ## Headline conclusions
 
