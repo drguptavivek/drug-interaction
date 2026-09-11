@@ -199,6 +199,54 @@ for this, so the counts come from an administrative register that has to be
 maintained from day one — reconstructing it later is far harder.
 See [08 §3.6.5](08-licensing.md#365-annual-declaration-of-use--a-recurring-obligation-the-plan-had-missed).
 
+### Q31
+**Does DDInter's bulk download cover all 14 ATC first levels, or only 8?**
+Blocks: **the whole project.** This is the coverage question in its sharpest
+form.
+Owner: Engineering + clinical pharmacology. **Half a day.**
+
+The download page at `ddinter.scbdd.com` lists 8 files — A, B, D, H, L, P, R, V
+— missing **C, G, J, M, N, S**. Those are cardiovascular, anti-infectives,
+nervous system, musculoskeletal, genito-urinary and sensory organs: the classes
+containing most CYP perpetrators, most narrow-therapeutic-index drugs, and most
+QT prolongers.
+
+**Check `ddinter2.scbdd.com` first** — that is DDInter 2.0; `ddinter.scbdd.com`
+is 1.0, and the observed file set may simply be the older release's.
+
+If the gap is real on 2.0 as well: pairs survive when *either* partner is in a
+present class, so what is lost is pairs with **both** partners in missing classes
+— azole × statin, SSRI × tramadol, phenytoin × carbamazepine, amiodarone ×
+haloperidol. Fewer pairs than 6-of-14 implies, but concentrated in the severe
+ones, which makes the [P7](14-phase-0-runbook.md#p7--coverage-census--the-gate)
+NTI/QT stop condition the binding constraint.
+
+Default if the gap is confirmed: this is a **re-scope trigger**, not something to
+engineer around. The honest options are a curated high-priority-list service
+(ONCHigh + institution-authored rules), an institution-authored rule set for the
+missing classes, or a licensed commercial source.
+
+### Q32
+**Does the DDInter bulk CSV carry mechanism and management text, or only drug
+pairs and a severity level?**
+Blocks: the clinical usefulness of every finding; the `RULE` section of the
+artifact ([04 §6](04-etl-pipeline.md#6-artifact-format)); the `mechanism` and
+`management` response fields ([06 §1](06-api-contracts.md#1-post-v1interactionscheck)).
+Owner: Engineering. **One hour — open a CSV.**
+
+The DDInter *website* shows mechanism and management per interaction. Whether
+the *bulk download* does is a different question. If it carries only
+`{pair, severity}`, then a finding says "major interaction" with no advice —
+no "separate administration by 4 hours, monitor TSH". Severity without management
+is an alert that tells a clinician to worry and not what to do, which is a
+direct contributor to override behaviour ([R2](09-risks.md)).
+
+If absent, the options are: scrape per-interaction pages (slow, and check the
+licence permits it), author management text institutionally for the interruptive
+tier only (small, high-value, fully ours and publishable), or ship severity-only
+findings and say so plainly in the UI. My preference is the second — the
+interruptive tier is a few dozen rules, and that is exactly where advice matters.
+
 ## Blocking Phase 1
 
 ### Q8

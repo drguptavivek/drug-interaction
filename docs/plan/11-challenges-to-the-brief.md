@@ -93,7 +93,17 @@ duplication can still be detected *structurally* at near-zero cost — worth doi
 provided it is labelled as structurally derived rather than presented as sourced
 knowledge.
 
-**Severity: blocking (scope).**
+**Update — a second, larger problem with the same source.** The bulk download
+appears to ship only **8 of the 14 ATC first levels** (missing C, G, J, M, N, S),
+which is a coverage question rather than a content-type question and is
+potentially fatal rather than merely descoping. See
+[Q31](10-open-questions.md#q31). Also unresolved: whether the bulk CSV carries
+mechanism and management text at all, or only pair and severity
+([Q32](10-open-questions.md#q32)). Both are observations from `ddinter.scbdd.com`
+(version 1.0) and must be re-checked against `ddinter2.scbdd.com` before any
+conclusion.
+
+**Severity: blocking (scope), and possibly blocking (viability).**
 
 ---
 

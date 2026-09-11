@@ -49,8 +49,12 @@ production code has been written. The documents below are the deliverable.
    and inhaled products are the general case of the iron oral-vs-parenteral
    exception already in the brief.
 6. **The dominant risk is neither software nor terminology — it is DDInter
-   coverage of the Indian formulary.** Measure it in Phase 0 before committing
-   to the rest.
+   coverage.** Now partly observed rather than hypothetical: the bulk download
+   appears to ship only 8 of the 14 ATC first levels, missing cardiovascular,
+   anti-infectives, nervous system, musculoskeletal, genito-urinary and sensory
+   organs — the classes where DDI risk concentrates. Verify against
+   `ddinter2.scbdd.com` (the 2.0 site) as the very first substantive Phase 0
+   task; it may be a re-scope trigger.
 7. **Run a terminology server (Snowstorm) for curation and build; never at
    runtime.** ECL and proper description search are worth the operational cost.
    The build consumes a checksummed ECL expansion cache, not a live server, so

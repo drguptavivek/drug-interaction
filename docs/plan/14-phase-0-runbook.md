@@ -112,19 +112,54 @@ eng-weeks and the 16 GB build machine.
 **Owner** Engineering + clinical pharmacology · **1 day** · **On the critical
 path**
 
-[Q3](10-open-questions.md#q3) — the scope question.
+[Q3](10-open-questions.md#q3) — the scope question. **This step has grown teeth:
+an initial look at the download page shows a likely serious coverage gap.**
 
-- [ ] Downloaded, checksummed, added to `sources.lock`
+**First, check you are on the right site.** DDInter 2.0 is at
+**`ddinter2.scbdd.com`**; `ddinter.scbdd.com` is version 1.0. The 8-file
+download set described below appears to be the 1.0 set. Everything under
+[Q31](10-open-questions.md#q31) may look different on the 2.0 site — check there
+before drawing any conclusion.
+
+- [ ] **ATC first-level completeness** ([Q31](10-open-questions.md#q31)). The
+      observed download set has 8 files — A, B, D, H, L, P, R, V — and is
+      missing **C, G, J, M, N, S**. Confirm against the 2.0 site whether that
+      holds. It matters more than the total record count, because the missing
+      classes are where DDI risk concentrates:
+
+      | Missing | Class | Why it matters |
+      |---|---|---|
+      | **C** | Cardiovascular | warfarin partners, digoxin, amiodarone, statins |
+      | **J** | Anti-infectives | macrolides, azoles, rifampicin — the classic CYP perpetrators |
+      | **N** | Nervous system | antidepressants, antipsychotics, antiepileptics, opioids — probably the largest single DDI category |
+      | **M** | Musculoskeletal | NSAIDs, very high volume in India |
+      | **G** | Genito-urinary / sex hormones | |
+      | **S** | Sensory organs | the ophthalmic route cases ([11 C11](11-challenges-to-the-brief.md#c11)) |
+
+- [ ] **Work out what is actually lost.** Each file holds interactions
+      *involving* that class, so a pair survives if **either** partner is in a
+      present class. The loss is pairs where **both** partners are in missing
+      classes — azole × statin, SSRI × tramadol, phenytoin × carbamazepine,
+      amiodarone × haloperidol. That is a smaller share of all pairs than the
+      6-of-14 ratio suggests, and a **much larger** share of the severe ones.
+- [ ] **Does the bulk CSV carry mechanism and management text, or only pair +
+      severity?** ([Q32](10-open-questions.md#q32)) If only severity, findings
+      have no actionable advice — "major interaction" with no "separate doses by
+      4 hours, monitor TSH". That degrades the product independently of coverage
+      and needs a decision, not a workaround.
+- [ ] **Deduplicate across files.** An A × B interaction appears in both the A
+      and B files. Union then dedup; report non-exact duplicates (same pair,
+      different severity) rather than silently picking one.
 - [ ] **Actual** drug and pair counts recorded (the brief's ~2,310 / ~302,000 are
       hypotheses to verify, not facts)
-- [ ] Does it contain drug–food, drug–disease, therapeutic duplication? My
-      expectation is **drug–drug only**
-- [ ] If drug–drug only: descope **in writing**, with stakeholder sign-off. Note
-      that exact-moiety duplication is still detectable structurally at near-zero
-      cost, labelled as structurally derived
-- [ ] Does it publish DrugBank cross-references? ([Q23](10-open-questions.md#q23))
+- [ ] Drug–food, drug–disease, therapeutic duplication present? Expectation:
+      **drug–drug only**. If so, descope **in writing** with stakeholder
+      sign-off; exact-moiety duplication remains detectable structurally at
+      near-zero cost, labelled as structurally derived
+- [ ] DrugBank cross-references published? ([Q23](10-open-questions.md#q23))
 
-**Done when** the contents are known and the scope statement matches them.
+**Done when** the ATC coverage, the field set, and the true record counts are
+known — and P7's sample is drawn with the missing classes explicitly in mind.
 
 ### P6 — Acquire RxNorm and the public-domain sources
 **Owner** Engineering · **0.5 day** · Parallel
@@ -157,9 +192,18 @@ For each: present in DDInter? SNOMED substance? UNII? ATC? CDCI?
 Re-scope to a curated high-priority-list service (ONCHigh + institution-authored
 rules) — smaller, better-defined, still clinically valuable.
 
+**Stratify against the P5 finding.** If the ATC gap in
+[Q31](10-open-questions.md#q31) is real, the NTI/QT stratum will be
+disproportionately affected — most of those molecules sit in C, J and N — and
+this stop condition is the one that will bind. Draw the sample so that the
+census *measures* the gap rather than accidentally avoiding it: report coverage
+per ATC first level, not only in aggregate.
+
 Also measure, while the sample is in hand: how many DDInter-missing molecules
 DrugBank would actually add ([11 C7](11-challenges-to-the-brief.md#c7)). Expect
-the increment to be small, because DDInter is largely DrugBank-derived.
+the increment to be small, because DDInter is largely DrugBank-derived — but if
+the gap is whole ATC classes rather than scattered molecules, that expectation
+may not hold, and it is worth re-testing rather than assuming.
 
 ### P8 — Get the AIIMS drug master
 **Owner** Pharmacy + clinical informatics · **1 week elapsed, 0.5 day work**
