@@ -308,5 +308,5 @@ exist. Clearly worth it.
 | RxNorm promoted from "interoperability" to structural anchor and collapse check | [03](03-candidate-ranking.md) |
 | RxNorm brand layer explicitly prohibited | [03](03-candidate-ranking.md) |
 | UMLS/RxNorm licence row, `SAB=RXNORM` filter, verify assertion | [08](08-licensing.md) |
-| Engineering estimate 42 → 44 person-weeks | [07](07-effort.md) |
+| Engineering estimate 42.5 → 44.5 person-weeks | [07](07-effort.md) |
 | Four new open questions (Q20–Q23) | [10](10-open-questions.md) |

@@ -210,6 +210,7 @@ offset  size   field
 | `IDX_DDI` | sorted DDInter id → ingredient |
 | `IDX_PROD` | product code → ingredient list (offsets into `PROD_ING`) |
 | `IDX_SALT` | salt sctid → moiety ingredient |
+| `IDX_HIST` | inactivated sctid → `{replacement, association}` from the historical association refsets (`SAME AS`, `REPLACED BY`, `POSSIBLY EQUIVALENT TO`), restricted to concepts relevant to the mapped set. A few thousand entries; lets a stale HMIS code resolve instead of dead-ending — [13 §3](13-hmis-neutral-integration.md#3-release-skew--the-hmiss-codes-will-go-stale-too) |
 | `ONCH` | ONCHigh membership bitmap over pairs |
 | `SIG` | detached signature is a **separate file**; this section holds the public key id only |
 

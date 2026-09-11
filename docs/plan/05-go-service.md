@@ -8,6 +8,7 @@ One binary, `ddid`. One companion CLI, `ddictl`. Both built from the same module
 cmd/
   ddid/                  main: config, wiring, graceful shutdown
   ddictl/                verify | inspect | diff | sign | dump | bench
+                         export --coding-set | qa-coding | conformance
 internal/
   kbfile/                artifact format: reader, writer, section table, CRC
   kbindex/               in-memory views over the mmap: CSR, code indexes
@@ -133,7 +134,15 @@ Resolution order, first hit wins, recorded in `Via`:
 3. SCTID/product code is a product → one or more moieties via `IDX_PROD`,
    `via_product`, route carried forward from the product.
 4. DDInter id supplied directly → `via_ddinter`.
-5. SCTID present in the pinned SNOMED release but inactive → `stale_code`.
+5. SCTID inactive → consult `IDX_HIST`:
+   - `SAME AS` → follow the replacement, resolve, and report
+     `resolved_using_replacement: true` prominently.
+   - `REPLACED BY` → follow it, and mark every dependent finding as resting on a
+     substitution.
+   - `POSSIBLY EQUIVALENT TO` → **do not follow.** Report the candidate,
+     resolve nothing. It is an editorial hint, not an assertion of identity, and
+     treating it as one attributes interactions to the wrong molecule.
+   - No association → `stale_code`.
 6. Nothing → `unknown_code`.
 
 Route is attached at resolution time because the predicate evaluator needs it,

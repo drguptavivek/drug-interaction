@@ -13,11 +13,33 @@ For internal applications. Synchronous, stateless, no patient identifiers.
 {
   "request_id": "b3f1…",                 // caller-supplied, echoed, for log correlation
   "drugs": [
-    { "ref": "1", "coding": [{ "system": "http://snomed.info/sct", "code": "372756006" }],
-      "route": "systemic_oral" },
-    { "ref": "2", "coding": [{ "system": "urn:cdc-india", "code": "CDC-IN-10422" }] },
-    { "ref": "3", "coding": [{ "system": "urn:ddinter", "code": "DDInter-00841" }] },
-    { "ref": "4", "text": "Tab. Amoxycillin 500 + Clav 125" }   // accepted, never trusted
+    // Substance-coded, the common case once SCTIDs are in the HMIS drug master
+    { "ref": "1", "local_id": "DM-104422", "display": "ELTROXIN 100MCG TAB",
+      "route": "systemic_oral", "dose_form": "tablet",
+      "ingredients": [
+        { "coding": [{ "system": "http://snomed.info/sct", "code": "372756006" }],
+          "strength": { "value": 100, "unit": "ug" } }
+      ] },
+
+    // Fixed-dose combination: ONE prescribed item, SEVERAL ingredient codes
+    { "ref": "2", "local_id": "DM-110877", "display": "AUGMENTIN 625 TAB",
+      "route": "systemic_oral", "dose_form": "tablet",
+      "ingredients": [
+        { "coding": [{ "system": "http://snomed.info/sct", "code": "372687004" }],
+          "strength": { "value": 500, "unit": "mg" } },
+        { "coding": [{ "system": "http://snomed.info/sct", "code": "96068000" }],
+          "strength": { "value": 125, "unit": "mg" } }
+      ] },
+
+    // Product-coded: preferred where available; decomposed by the service.
+    // Supplying BOTH coding[] and ingredients[] yields a free cross-check.
+    { "ref": "3", "local_id": "DM-100913", "display": "PANTOCID 40MG TAB",
+      "route": "systemic_oral",
+      "coding": [{ "system": "urn:cdc-india", "code": "CDC-IN-10422" }] },
+
+    // Free text: accepted, never trusted, never alerted on
+    { "ref": "4", "local_id": "DM-999001",
+      "text": "Tab. Amoxycillin 500 + Clav 125" }
   ],
   "context": {                            // all optional, all coarse
     "age_band": "65_plus",
@@ -35,11 +57,29 @@ For internal applications. Synchronous, stateless, no patient identifiers.
 
 Design notes:
 
+- **`coding[]` and `ingredients[]` are different things and must not be conflated.**
+  `coding[]` holds alternative codings of *the product* (SCTID, CDC-India code,
+  local code) — competing views of one concept. `ingredients[]` holds the
+  *composition* — one entry per active ingredient. An FDC is one `drugs[]` entry
+  with several `ingredients[]`, never several `drugs[]` entries. Collapsing the
+  two would silently turn one FDC into two independent orders, or discard a
+  component as a "duplicate coding". See [13 §2.2](13-hmis-neutral-integration.md#22-one-prescribed-item-may-carry-several-ingredient-codes).
+- Resolution precedence: `coding` (product) if it resolves, else `ingredients`.
+  Supplying both is encouraged — disagreement is reported as `coding_conflict`,
+  which is a drug master coding error worth surfacing, not something to resolve
+  silently in favour of one side.
+- **`local_id` is required.** It is the HMIS's own drug master row identifier,
+  echoed everywhere in the response. It is the only thing that makes a coding
+  error actionable — it points at one row in one table instead of leaving the
+  integrator to guess. It carries no patient information.
+- **`route` is supplied by the caller, not inferred.** A substance SCTID carries
+  no route, and route gates applicability ([C11](11-challenges-to-the-brief.md#c11)).
+  The HMIS already holds this field. Absent, the response says `route: unknown`,
+  the systemic × systemic default applies, and every finding that depended on
+  that assumption is flagged.
+- `display` is echoed for human readability and is **never parsed**.
 - `ref` is caller-assigned and is how every output element points back at an
   input. Positional indexing breaks the moment a caller filters its own list.
-- `coding` is an array: a caller may supply SCTID *and* a local product code, and
-  agreement between them is extra evidence. Disagreement is reported, not
-  silently resolved to the first one.
 - `text` is accepted because real HMIS integrations will send it, and refusing it
   means integrators will fabricate a code instead. But a `text`-only drug can
   never be `resolved` — its best outcome is `resolved_low_confidence`, which the
@@ -143,7 +183,8 @@ prevent.
 | `resolved_via_product` | Product decomposed; may yield several moieties | `resolved[]` |
 | `resolved_low_confidence` | Free text or fuzzy match; **not used for alerting** | `unresolved[]` |
 | `ambiguous` | Code maps to > 1 moiety with no decomposition available | `unresolved[]` |
-| `stale_code` | Code known to the KB but inactive in the local SNOMED release | `unresolved[]` |
+| `stale_code` | Code inactive in the KB's SNOMED release. Carries `replacement` from the historical association refsets where one exists — see [13 §3](13-hmis-neutral-integration.md#3-release-skew--the-hmiss-codes-will-go-stale-too) | `unresolved[]`, or `resolved[]` when a `SAME AS` replacement was followed |
+| `coding_conflict` | `coding[]` and `ingredients[]` disagree — a drug master coding error | `unresolved[]` |
 | `unknown_code` | Code not in the KB | `unresolved[]` |
 | `unsupported_system` | Coding system not understood | `unresolved[]` |
 | `excluded_by_overlay` | Not on this institution's formulary | `unresolved[]` |

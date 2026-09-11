@@ -26,6 +26,7 @@ production code has been written. The documents below are the deliverable.
 | 10 | [Open questions](docs/plan/10-open-questions.md) | Decisions required before build starts |
 | 11 | [Challenges to the brief](docs/plan/11-challenges-to-the-brief.md) | Constraints I believe are mistakes, with reasons |
 | 12 | [Terminology tooling](docs/plan/12-terminology-tooling.md) | Terminology server (build-time yes, runtime never); RxNorm's expanded role |
+| 13 | [HMIS-neutral integration](docs/plan/13-hmis-neutral-integration.md) | What changes when SCTIDs live in the HMIS and no adapter is in scope |
 
 ## Headline conclusions
 
@@ -58,13 +59,24 @@ production code has been written. The documents below are the deliverable.
    split is an independent check on the riskiest decision in the design, and it
    may be the only way to derive the SNOMED-side UNII anchor. Its *brand* layer,
    by contrast, should be prohibited outright.
+9. **HMIS neutrality moves the integration risk rather than removing it.** No
+   adapter in scope, no vendor dependency on the critical path — but the drug
+   master coding exercise it creates can produce confidently wrong findings that
+   nobody downstream can see. A coding QA report, a `/v1/resolve` pre-flight, and
+   two *mandatory* conformance fixtures are the replacements, and they are
+   load-bearing.
+10. **An FDC is one prescribed item with several ingredient codes**, not several
+    items. `coding[]` (alternative codings of one product) and `ingredients[]`
+    (composition) are separate fields; conflating them silently drops FDC
+    components.
 
 ## Scale of the work
 
 | | Person-weeks |
 |---|---|
-| Engineering | 35–44 |
+| Engineering | 39–46.5 |
 | Clinical curation and departmental liaison | 7–9.3 |
+| Pharmacy, drug master SCTID coding | 1.5–2.5 |
 | **Calendar, 2 engineers + part-time clinical panel** | **~7 months** |
 
 Full breakdown in [07](docs/plan/07-effort.md).

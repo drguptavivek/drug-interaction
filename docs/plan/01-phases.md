@@ -189,26 +189,39 @@ a smaller, better-defined and still clinically valuable system.
 
 ---
 
-## Phase 5 — HMIS integration
+## Phase 5 — Integration contract, conformance and coding support
 
-**Duration** 5 weeks · **Effort** 6 eng-weeks
+**Duration** 4 weeks · **Effort** 5.5 eng-weeks
 
-**Entry** Phase 4 exit met; AIIMS HMIS integration contact named and a test
-instance available. *This second condition is the usual schedule killer — escalate
-at Phase 3 if it is not in place.*
+**Entry** Phase 4 exit met. *No dependency on an HMIS test instance or a vendor
+contact — that dependency was removed by the HMIS-neutral decision
+([13](13-hmis-neutral-integration.md)).*
 
 **Work**
 - CDS Hooks `order-select` and `order-sign` per HL7 PDDI-CDS IG.
-- An adapter for the AIIMS HMIS's actual interface. Do not assume FHIR
-  ([C9](11-challenges-to-the-brief.md#c9)); budget for a CSV/SOAP/proprietary
-  shim and confirm the real protocol in Phase 3, not here.
-- Shadow mode: HMIS calls the service and logs findings without displaying them.
+- **Conformance kit**: OpenAPI + CDS Hooks discovery documents, ~40 fixture
+  request/response pairs covering every outcome-taxonomy branch, and
+  `ddictl conformance --endpoint <url>` so any HMIS vendor can self-certify
+  without us ([13 §4.4](13-hmis-neutral-integration.md#44-conformance-kit)).
+- **Coding target set** export (`ddictl export --coding-set`) — the list of codes
+  the KB understands, so the HMIS team codes against that rather than against the
+  whole of SNOMED CT.
+- **`ddictl qa-coding`** — batch quality report over a coded drug master.
+- `IDX_HIST` historical associations, so stale HMIS codes resolve to their
+  replacements rather than dead-ending.
+- Shadow mode: the HMIS calls the service and logs findings without displaying
+  them. Still needed, and still requires a cooperating HMIS — but now it is the
+  institution's integration, tested against a published contract, not ours.
 
 **Exit criteria**
 - [ ] CDS Hooks discovery and both hooks pass the public CDS Hooks sandbox.
-- [ ] Shadow mode running in the HMIS test instance for ≥ 2 weeks with logged
-      alert volumes.
-- [ ] Unresolved-drug array demonstrably surfaced in the HMIS, not dropped.
+- [ ] Conformance kit published; all fixtures pass against our own service.
+- [ ] The two **mandatory** fixtures pass against the AIIMS integration: the
+      unresolved array is displayed, and `partial` is not rendered as
+      "no interactions found" ([R28](09-risks.md)).
+- [ ] `qa-coding` run over the full AIIMS drug master; unresolved rate and FDC
+      arity mismatches reported and triaged.
+- [ ] Shadow mode running for ≥ 2 weeks with logged alert volumes.
 
 ---
 

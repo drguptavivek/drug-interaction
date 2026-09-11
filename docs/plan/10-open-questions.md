@@ -6,16 +6,44 @@ person; assign real names at kickoff.
 ## Blocking Phase 0 exit
 
 ### Q1
-**What protocol does the AIIMS HMIS actually speak, and is a test instance
-available?**
-Blocks: Phase 5 design, and the Phase 5 estimate (2 eng-weeks vs 6+).
-Owner: Clinical informatics lead + HMIS vendor/NIC contact.
-Why it cannot wait: it is the largest single variance in the estimate
-([07 §1](07-effort.md#1-engineering)), and a proprietary interface may require a
-vendor change request with its own procurement timeline. Establish the contact in
-Phase 0 even though the work is in Phase 5.
-Default if unanswered: assume a REST shim written by us against a
-database-view-level integration, and add 4 eng-weeks of contingency.
+**~~What protocol does the AIIMS HMIS actually speak?~~ — largely closed.**
+Superseded by the HMIS-neutral decision ([13](13-hmis-neutral-integration.md)).
+We publish a contract and a conformance kit; the calling system's protocol is
+not our concern. What remains is narrower and is asked as Q24–Q26 below.
+
+### Q24
+**At what level will SCTIDs be added to the HMIS drug master — substance,
+product, or CDC-India codes? And how many rows are there?**
+Blocks: Phase 5 coding support tooling, and the pharmacy effort estimate.
+Owner: Pharmacy + HMIS team.
+See [13 §2](13-hmis-neutral-integration.md#2-the-crux-which-sctids-will-the-hmis-hold).
+Expect mostly substance-level, since Indian brands will not exist as SNOMED
+product concepts. The request model accommodates all three, so this does not
+block the build — but it determines whether `route` and `dose_form` must come
+from the HMIS (they must, under substance-level coding) and how large the coding
+exercise is. **Ask to see the drug master in Phase 0**; it is a spreadsheet, and
+looking at it removes most of the remaining uncertainty in the plan.
+
+### Q25
+**Who owns the drug master coding exercise, and does it go through
+maker-checker?**
+Blocks: Phase 5 governance.
+Owner: Pharmacy + clinical governance.
+Recommendation: yes to maker-checker, in the same platform. A mis-coded row
+([R27](09-risks.md)) is higher-volume and lower-attention work than molecule
+mapping, and its errors are invisible downstream. It deserves at least the same
+control.
+
+### Q26
+**Will the AIIMS integration commit to passing the two mandatory conformance
+fixtures** — displaying the unresolved array, and not rendering `partial` as
+"no interactions found"?
+Blocks: Phase 5 exit, and arguably go-live.
+Owner: Clinical informatics lead + HMIS team.
+This is the one integration requirement worth being inflexible about
+([R28](09-risks.md)). Everything else in the taxonomy is advisory; these two are
+the difference between "the service said nothing about this drug" and "the
+service said this drug is safe".
 
 ### Q2
 **Does the SNOMED CT India edition contain substance concepts, or only products

@@ -291,7 +291,15 @@ sequence it second:
 3. A thin `ddi-hmis-shim` adapting whatever the HMIS speaks. Budget it, and
    confirm the real protocol in Phase 3, not Phase 5 ([Q1](10-open-questions.md#q1)).
 
-**Severity: medium (sequencing, with schedule risk).**
+**Update after the HMIS-neutral decision.** This position is strengthened rather
+than changed. With SCTIDs going into the HMIS drug master and no site-specific
+adapter in our scope, REST is not merely first — it is the only integration
+surface we own, and CDS Hooks becomes the standards-conformant option for
+deployments that can use it. The `ddi-hmis-shim` I budgeted here is removed from
+scope entirely; a conformance kit replaces it. See
+[13](13-hmis-neutral-integration.md).
+
+**Severity: medium (sequencing, with schedule risk) — now largely retired.**
 
 ---
 

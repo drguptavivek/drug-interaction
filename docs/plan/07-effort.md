@@ -27,13 +27,16 @@ which is roughly 4× longer and is a scheduling problem, not an effort problem.
 | 3 | FDC decomposition tooling | 1.0 | **Low** |
 | 4 | Artifact format: writer, reader, CRC, signing | 2.0 | Medium |
 | 4 | `kbindex` CSR + resolver + predicate evaluator | 2.0 | High |
-| 4 | REST surface + OpenAPI + contract tests | 1.5 | High |
+| 4 | REST surface + OpenAPI + contract tests (incl. `ingredients[]`/`coding[]`, `local_id`, route) | 2.0 | High |
 | 4 | Offline auth, config, overlay loader, startup validation | 1.5 | Medium |
 | 4 | `ddictl` (verify/inspect/diff/dump/bench) | 1.0 | High |
 | 4 | Observability, audit log | 0.5 | High |
 | 4 | Performance work to hit p99 ≤ 5 ms / 0 allocs | 0.5 | Medium |
 | 5 | CDS Hooks discovery + both hooks, IG conformance | 2.0 | Medium |
-| 5 | HMIS adapter/shim | 2.0 | **Low** |
+| 5 | Conformance kit (fixtures + `ddictl conformance`) | 1.0 | High |
+| 5 | Coding target set export + `ddictl qa-coding` | 1.0 | High |
+| 5 | Drug master coding view in the curation UI | 1.0 | Medium |
+| 5 | `IDX_HIST` historical associations (ETL + artifact + resolver) | 0.5 | High |
 | 5 | Shadow-mode instrumentation | 1.0 | Medium |
 | 6 | Tiering engine + overlay authoring tooling | 1.5 | Medium |
 | 6 | Alert-volume replay harness | 1.0 | Medium |
@@ -41,7 +44,9 @@ which is roughly 4× longer and is a scheduling problem, not an effort problem.
 | 6 | Clinical safety case support (hazard log tooling, traceability) | 0.5 | Medium |
 | 7 | Pilot support, deployment docs, runbook, handover | 2.5 | Medium |
 | all | CI, packaging, release engineering, security review | 2.0 | Medium |
-| | **Subtotal** | **44.0** | |
+| | **Subtotal** | **46.5** | |
+
+The subtotal is the sum of the rows above; keep it that way when rows change.
 
 **Low-confidence items, and why:**
 
@@ -52,16 +57,18 @@ which is roughly 4× longer and is a scheduling problem, not an effort problem.
 - *FDC decomposition (1.0)* — entirely dependent on whether CDC-India supplies
   structured composition. If it supplies only names, this becomes a parsing
   project: 3.0+.
-- *HMIS adapter (2.0)* — a placeholder until the real interface is known. Could
-  be 0.5 (clean REST) or 6.0 (a proprietary interface requiring vendor
-  involvement and a change request). **This is the single largest scheduling
-  unknown in the plan** and is [Q1](10-open-questions.md#q1).
+The pessimistic case dropped from 60 to 52 because the HMIS adapter — previously
+the single largest scheduling unknown, with a 0.5–6.0 range and no way to resolve
+it before month 5 — was removed by the HMIS-neutral decision
+([13 §8](13-hmis-neutral-integration.md#8-effort-delta)). The planning number rose
+by 2.0 and the variance fell by roughly 8. That is the better trade.
 
-**Engineering range: 35 (optimistic) – 44 (planning) – 60 (pessimistic).**
+**Engineering range: 39 (optimistic) – 46.5 (planning) – 53 (pessimistic).**
 
-The +2.0 against the first draft is the terminology-server and RxNorm decisions
-in [12](12-terminology-tooling.md): +2.0 for Snowstorm and the ECL cache, +1.0
-for RxNorm, −1.0 saved on hand-written closure and search SQL. Both buy
+Of the movement since the first draft (42.5): +2.0 for the terminology-server and
+RxNorm decisions in [12](12-terminology-tooling.md) (+2.0 Snowstorm and the ECL
+cache, +1.0 RxNorm, −1.0 saved on hand-written closure and search SQL), and +2.0
+for the HMIS-neutral decision in [13](13-hmis-neutral-integration.md). Both buy
 correctness on the parts of the design most likely to fail quietly.
 
 The optimistic case assumes CDC-India ships structured composition, the HMIS
@@ -107,6 +114,7 @@ really goes, and it is the part that determines whether the system is used.
 | Clinical pharmacologist (checker, tier owner) | 0.2 FTE for 5 months |
 | Residents (makers, 2–3 rotating) | ~0.3 FTE aggregate for 3 months |
 | Terminologist / SNOMED-experienced analyst | 0.2 FTE for 3 months, concentrated on the hard queue |
+| Pharmacy technician + pharmacist (drug master coding) | ~1.5–2.5 person-weeks, Phase 5 |
 | Project lead / clinical informatics | 0.2 FTE throughout |
 
 **Calendar: ~7 months to Phase 7 exit**, with the critical path running

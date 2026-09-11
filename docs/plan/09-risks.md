@@ -43,7 +43,10 @@ month, even though the latter is more visible to a steering committee.
 
 | ID | Risk | L | I | Score | Mitigation | Early warning |
 |---|---|---|---|---|---|---|
-| **R19** | **HMIS integration is far harder than assumed** — no FHIR, no CDS Hooks, a proprietary or database-level interface. | 4 | 4 | **16** | Confirm the actual protocol in Phase 3, not Phase 5 ([Q1](10-open-questions.md#q1)); REST-first sequencing; budget an adapter; escalate early if a test instance is not available. | Absence of a named HMIS contact by end of Phase 3 |
+| **R19** | HMIS integration far harder than assumed. | 2 | 3 | 6 | **Largely retired** by the HMIS-neutral decision: no adapter in scope, no protocol discovery, no vendor change request on the critical path ([13 §1](13-hmis-neutral-integration.md#1-the-contract-becomes-the-whole-integration)). | — |
+| **R27** | **HMIS drug master mis-coded.** A wrong SCTID on one row produces confidently wrong findings for every order of that product, indefinitely, and nobody downstream can see it. | 4 | 4 | **16** | `ddictl qa-coding` batch report (salt-vs-moiety errors, FDC arity, grouper concepts, internal inconsistency); `/v1/resolve` as a pre-flight over the whole master before go-live; coding governed by maker-checker like any other mapping; `local_id` echoed everywhere so a suspicious finding points at one row ([13 §4](13-hmis-neutral-integration.md#4-deliverables-that-replace-the-adapter)). | Unresolved rate and arity mismatches in the QA report |
+| **R28** | **The HMIS renders `partial` as "no interactions found", or drops the unresolved array.** The outcome taxonomy is the plan's main safety mechanism and its final presentation is now outside our control. | 3 | 5 | **15** | Two **mandatory** conformance fixtures covering exactly these two failures; `not_evaluated[].message` written so a lazy integrator rendering it verbatim still tells the truth; shadow-mode review of what clinicians actually see. | Conformance run; pilot interviews |
+| **R29** | **HMIS codes go stale** against newer KB releases; drug masters are re-coded rarely. | 4 | 2 | 8 | `IDX_HIST` historical associations resolve `SAME AS`/`REPLACED BY` and report the substitution; `POSSIBLY EQUIVALENT TO` deliberately not followed; every `stale_code` with a replacement is a re-coding worklist item. | `ddi_unresolved_total{status="stale_code"}` |
 | **R20** | **Clinician availability collapses** and Phase 3 stalls. | 4 | 3 | 12 | Rotating resident makers; asynchronous work queue; department-count sequencing means the highest-value molecules are done first, so a truncated Phase 3 still yields a usable KB. Calendar buffer, not effort buffer. | Weekly adjudication throughput |
 | **R21** | **Ranking tool underperforms**, band-A share far below 65%, curation effort doubles. | 3 | 3 | 9 | Calibrate on the Phase 2 50-molecule pilot and revise the estimate before Phase 3; terminologist allocated to the hard queue. | Phase 2 pilot |
 | **R22** | **Artifact corruption in the field** (USB copy, failing disk at a PHC). | 3 | 3 | 9 | Per-section CRC; Ed25519 signature verified before interpretation, non-overridable; fuzz-tested reader that cannot panic on corrupt input. | Startup failures in the field |
@@ -58,7 +61,13 @@ month, even though the latter is more visible to a steering committee.
 2. **R2** — Alert fatigue (20)
 3. **R5** — FDC decomposition gaps (16)
 4. **R7** — Validation set never collected (16)
-5. **R14 / R16 / R19 / R26** — ShareAlike on the binary, HMIS integration, no maintainer (16)
+5. **R14 / R26 / R27** — ShareAlike on the binary, no maintainer, mis-coded drug master (16)
+
+R27 and R28 are new, and they are the cost of HMIS neutrality: the integration
+risk did not vanish, it moved to the far side of a contract we do not control.
+That is still the right trade — a published contract with a conformance kit is
+more testable than a bespoke adapter per site — but it means the QA report and
+the two mandatory fixtures are load-bearing, not nice-to-have.
 
 R1 and R2 are the two that decide whether this system is used or quietly
 switched off. Both are addressed by gates, not by good intentions: R1 by the
