@@ -160,12 +160,18 @@ the files, in about twenty minutes.
 **Done when** the ATC coverage, the field set, and the true record counts are
 known — and P7's sample is drawn with the missing classes explicitly in mind.
 
-### P6 — Acquire RxNorm and the public-domain sources
-**Owner** Engineering · **0.5 day** · Parallel
+### P6 — Acquire the remaining sources
+**Owner** Engineering · **0.5 day work, some lead time** · Parallel
 
-- [ ] UMLS/UTS account; RxNorm full monthly release
-- [ ] Confirm `DRUGBANK` present as a source vocabulary ([Q23](10-open-questions.md#q23))
-- [ ] UNII/GSRS, WHO ATC, openFDA, ONCHigh
+Full checklist, with per-source licensing notes: **[16](16-source-checklist.md)**.
+
+- [ ] **UTS account requested today** — RxNorm may be the only path to the
+      SNOMED-side UNII anchor, and registration is not instant
+- [ ] UNII/GSRS **including substance relationships**, not just the flat list
+- [ ] NLEM 2022, DrugBank **Open Data** (CC0 subset only), ONCHigh
+- [ ] **ATC sourced from inside DDInter and RxNorm — do not buy the WHOCC index**
+      ([16 §2](16-source-checklist.md#2-atc--the-licensing-trap-and-why-you-probably-do-not-need-to-buy-it))
+- [ ] openFDA deprioritised — several GB for curator evidence display only
 - [ ] All entered in `sources.lock` with per-source `redistributable` flags — the
       build gate reads these, so a wrong flag is a compliance failure
 
