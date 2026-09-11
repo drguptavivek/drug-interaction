@@ -42,7 +42,7 @@ split shown and editable. Never let a bad split silently become two bad mappings
 
 ## 3. Stage 2 — Candidate generation (recall-oriented, ~20 candidates)
 
-Eight independent retrievers. Independence is the point: corroboration across
+Six independent retrievers (R1–R6). Independence is the point: corroboration across
 retrievers is a scoring feature, so retrievers must not share a code path.
 
 | ID | Retriever | Index | Typical yield |
@@ -51,25 +51,17 @@ retrievers is a scoring feature, so retrievers must not share a code path.
 | R2 | SNOMED fuzzy — trigram similarity over FSN + all active synonyms | `pg_trgm` GIN | 5–10 |
 | R3 | SNOMED via product — CDC-India/SNOMED product concept → `has active ingredient` → substance | relationship join | 0–3, high precision when brand resolved |
 | R4 | DDInter name match — exact then trigram over DDInter drug names | `pg_trgm` | 0–5 |
-| R5 | UNII/GSRS name match — preferred term and all synonyms, then UNII → SNOMED via the UNII map refset **if the release contains one** ([Q22](10-open-questions.md#q22)); otherwise via R8 | join | 0–2, very high precision |
+| R5 | **GSRS** — substance name and synonym match, then UNII → SNOMED via the UNII map refset if the release contains one ([Q22](10-open-questions.md#q22)); otherwise FSN name match | join | 0–2, very high precision. **The primary anchor path** |
 | R6 | ATC name match — WHO ATC index name → ATC-5 → members | join | 0–3 |
-| R7 | RxNorm **name** match at IN/PIN level — weak, and never a sole basis for a proposal | join | 0–2 |
-| R8 | RxNorm **structural** — `DDInter → DrugBank → RXCUI → SNOMEDCT_US → SCTID`, and `SCTID → RXCUI → UNII`. No string matching at any step | join | 0–2, very high precision |
 
-R7 and R8 are the same source and deserve opposite treatment — see
-[12 §B5](12-terminology-tooling.md#b5-consequent-changes-to-the-ranking-algorithm).
-R8 is a structural path and is strong evidence; R8 may also be the **only**
-derivation of the SNOMED-side UNII anchor if the release ships no UNII map
-refset. R7 is lexical and is weak. RxNorm **brand** names (`BN`, `SBD`) are
-prohibited as evidence entirely: Indian and US brand names collide frequently
-for different molecules, so a brand match is a false-evidence generator — worse
-than no evidence, because it looks like corroboration.
+**RxNorm retrievers (R7, R8) are removed** — RxNorm is out of scope, and GSRS
+covers its anchor and moiety-relationship roles more directly
+([12 §B](12-terminology-tooling.md#part-b--rxnorm-dropped-gsrs-instead)).
 
-R7's constraint is deliberate: RxNorm reflects the US market. An Indian molecule
-absent from RxNorm is unremarkable, and a *present* RxNorm match on an Indian
-brand name is frequently a coincidental homonym. The brief already says RxNorm is
-for international interoperability; the ranker enforces that by capping its
-contribution and refusing to preselect a candidate supported by R7 alone.
+One principle survives the removal and applies to **every** source: **no
+brand-name evidence.** Indian and US brand names collide for entirely different
+molecules, so a brand match is a false-evidence generator — worse than no
+evidence, because it looks like corroboration.
 
 Candidates are then **normalised to moiety**: any candidate that is a salt (has
 an outgoing `Is modification of` edge classified as `salt`) is replaced by its
@@ -92,7 +84,7 @@ score(c) = Σ w_i · f_i(c)          clipped to [0, 100]
 |---|---|---|---|---|
 | F1 | Exact match on an active SNOMED FSN/synonym | 0/1 | **30** | |
 | F2 | Lexical similarity (token-set Jaro-Winkler, post-N6) | 0–1 | 20 | |
-| F3 | UNII agreement between the SNOMED side and the DDInter side | 0/1 | **25** | the strongest single signal |
+| F3 | UNII agreement between the SNOMED side and the DDInter side | 0/1 | **25 / 15** | The strongest single signal — **if** a UNII map refset exists. Absent one, both sides are partly name-derived; weight drops to 15 ([Q22](10-open-questions.md#q22)) |
 | F4 | ATC-5 **set overlap** (Jaccard) | 0–1 | 10 | §5 |
 | F5 | Retriever corroboration count, `min(k,4)/4` | 0–1 | 10 | independence matters |
 | F6 | Candidate is a moiety (no outgoing `Is modification of`) | 0/1 | 8 | |
@@ -102,11 +94,11 @@ score(c) = Σ w_i · f_i(c)          clipped to [0, 100]
 | P1 | Candidate concept is inactive in the pinned release | 0/1 | **−40** | |
 | P2 | Candidate is an ester/prodrug/complex, not a salt | 0/1 | −15 | forces a conscious decision |
 | P3 | UNII **disagreement** between sides | 0/1 | **−35** | |
-| P4 | Supported by R7 only | 0/1 | −20 | |
-| F10 | RxNorm **structural** path corroborates the candidate (R8) | 0/1 | **20** | Often the same evidence as F3; independent when the UNII refset is absent |
-| F11 | RxNorm IN/PIN agrees with the proposed `derivation_kind` | 0/1 | 8 | Independent second opinion on salt collapse |
+| ~~P4~~ | ~~Supported by R7 only~~ | — | — | **Removed** with RxNorm |
+| ~~F10~~ | ~~RxNorm structural path~~ | — | — | **Removed** with RxNorm |
+| F11 | **GSRS ACTIVE MOIETY** agrees with the proposed `derivation_kind` | 0/1 | **12** | A regulatory substance determination — a stronger second opinion on salt collapse than RxNorm IN/PIN would have been |
 | P5 | Homonym risk: candidate name is also a common non-drug English word, or matches ≥ 3 unrelated substances | 0/1 | −10 | |
-| P6 | RxNorm treats as a distinct `IN` what SNOMED marks as a modification | 0/1 | **−20** | Strong prodrug/ester signal; blocks band A |
+| P6 | **GSRS** records a distinct substance where SNOMED asserts a modification | 0/1 | **−20** | Strong prodrug/ester signal; blocks band A |
 
 **Bands and what they do:**
 
@@ -156,12 +148,11 @@ One screen, no scrolling for the common case.
 ┌─ Candidate 1  score 92  BAND A ─────────────────────────── [ ● selected ]┐
 │ SNOMED  395821009 | Pantoprazole (substance) |            ACTIVE  Intl   │
 │ DDInter DDInter-00841  "Pantoprazole"                                    │
-│ UNII    D8TST4O562  ✓ agrees (snomed→rxcui→unii ↔ ddinter→gsrs)          │
+│ UNII    D8TST4O562  ✓ agrees (snomed refset ↔ ddinter→gsrs)              │
 │ ATC-5   A02BC02  ✓ overlap 1/1                                           │
 │ moiety  yes — no 'Is modification of' edges                              │
-│ RxNorm  typed IN, not PIN  ✓ agrees this is the moiety, not a salt       │
-│ found by R1 exact, R2 trg 0.97, R4 exact, R5 unii, R6 atc,               │
-│          R8 structural (ddinter→drugbank→rxcui→sctid)   6/8              │
+│ GSRS    active moiety = itself  ✓ not a salt or ester                    │
+│ found by R1 exact, R2 trg 0.97, R4 exact, R5 gsrs/unii, R6 atc   5/6     │
 │ ─ salts that will collapse into this moiety ──────────────────────────── │
 │   pantoprazole sodium (sctid 428204000)  derivation: salt                │
 │   pantoprazole sodium sesquihydrate      derivation: salt                │

@@ -81,7 +81,7 @@ production code has been written. The documents below are the deliverable.
 
 | | Person-weeks |
 |---|---|
-| Engineering | 39–46.5 |
+| Engineering | 37–44.5 |
 | Clinical curation and departmental liaison | 7–9.3 |
 | Pharmacy, drug master SCTID coding | 1.5–2.5 |
 | **Calendar, 2 engineers + part-time clinical panel** | **~7 months** |

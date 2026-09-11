@@ -16,7 +16,7 @@ proposing anything.
 
 ```
 README.md                 index + headline conclusions
-docs/plan/00–13           the plan (see README table)
+docs/plan/00–16           the plan (see README table)
 snomed-releases/          LOCAL ONLY — licensed release archives, gitignored
 .gitignore                a compliance control; read the comment at the top
 ```
@@ -27,7 +27,7 @@ The three documents that carry the most weight:
 |---|---|
 | `docs/plan/11-challenges-to-the-brief.md` | Twelve constraints in the original brief I argued are mistakes, with reasons. Read before re-proposing any of them. |
 | `docs/plan/08-licensing.md` | What may and may not be published. This repo is **public**. |
-| `docs/plan/10-open-questions.md` | Q1–Q26. Several are Phase 0 gates. |
+| `docs/plan/10-open-questions.md` | Q1–Q32. Several are Phase 0 gates; **Q22 has no fallback now that RxNorm is dropped**. |
 
 ## Hard rules
 
@@ -83,8 +83,9 @@ The folder is tracked (via `.gitkeep`) so the layout is discoverable; its
 contents are ignored. See `snomed-releases/README.md` for expected structure and
 for how to record a release in `sources.lock`.
 
-Other licensed sources get sibling directories, already gitignored: `ddinter/`,
-`rxnorm/`, `umls/`, `credible-meds/`, `cdc-india/`, `drugbank/`.
+Other sources get sibling directories, already gitignored: `ddinter/` (tracked,
+with its own README and inspection recipe), `gsrs/`, `credible-meds/`,
+`cdc-india/`, `drugbank/`.
 
 ## Where the work picks up: Phase 0
 
@@ -97,12 +98,15 @@ what matters:
       DDInter, SNOMED substance, UNII, ATC. **Stop condition: < 70% DDInter
       coverage of the NTI/QT stratum means re-scope**, not push on. This is
       risk R1, the highest-scored risk in the plan.
-- [ ] **Q3** — does DDInter 2.0 actually contain drug–food, drug–disease and
-      therapeutic duplication content? I believe it is drug–drug only. Scope
-      depends on the answer.
-- [ ] **Q2 / Q22** — unpack a SNOMED release and check: does the India edition
-      carry substance concepts of its own, and is there a **UNII map refset**?
-      Both are `grep` questions. Q22 decides how load-bearing RxNorm is.
+- [x] **Q3 answered** — DDInter 2.0 *does* carry drug–food, drug–disease and
+      therapeutic duplication, and the brief's DDI counts were exact. My
+      challenge (C3) is withdrawn. See `15-content-types.md`.
+- [ ] **Q31 / Q32** — does the bulk download expose the full database, and does
+      the CSV carry mechanism and management text? Recipe in `ddinter/README.md`.
+- [ ] **Q22 — do this first.** Is there a **UNII map refset**? With RxNorm
+      dropped there is no fallback: absent the refset, both spokes derive UNII
+      partly by name and the third-anchor check weakens (F3 weight 25 → 15).
+      A `grep` against files already on the laptop.
 - [ ] **Q5 / Q6** — CredibleMeds and ONCHigh redistribution terms (legal).
 - [ ] **Q24** — **ask to see the AIIMS drug master.** It's a spreadsheet, and
       looking at it collapses most of the remaining uncertainty in the plan:
@@ -115,12 +119,11 @@ what matters:
       [`snomed-releases/README.md`](snomed-releases/README.md) answers Q22
       (UNII map refset?), confirms the product/substance split, and sizes the
       `Is modification of` classification job. ~20 minutes.
-- [ ] **Q27 — does CSNOServ's API support ECL?** Half a day against
-      `nrces.in/bhts/api/v1/csnoserv/`. If yes, the Snowstorm standup (2.0
-      eng-weeks) and the 16 GB build machine both disappear. Check the **API**;
-      the browser at `/bhts/browser/` is CSNOFinder and works regardless.
+- [ ] **Q27 — endpoint shape** of BHTS/CSNOServ's ECL support (FHIR
+      `ValueSet/$expand` with an ECL filter, or native?). An hour; the ECL client
+      needs to know either way.
 - [ ] Licence memo signed by institutional legal.
-- [ ] 16 GB build machine requested — **only if Q27 says Snowstorm is needed.**
+- [ ] Full source checklist: `docs/plan/16-source-checklist.md`.
 
 ## Conventions once code starts
 
@@ -131,10 +134,11 @@ what matters:
 | Curation UI | Svelte | `01` Phase 2 |
 | Curation store | PostgreSQL 16 | `02` |
 | Auth | Keycloak OIDC, validated offline | `05 §8` |
-| Terminology | Prefer **CSNOServ** (Apache-2.0 CSNOtk, Indian extensions pre-integrated); **BHTS** hosted for interactive curation; Snowstorm only as fallback. Build always consumes a checksummed ECL expansion cache from pinned RF2, never a live server | `12` |
+| Terminology | **CSNOServ is Snowstorm** (Apache-2.0 CSNOtk, Indian extensions pre-integrated). Use **BHTS** hosted for curation; the build always consumes a checksummed ECL expansion cache, never a live server | `12` |
+| Substance authority | **GSRS/UNII** (NCATS, public domain) — UNII anchor plus the `ACTIVE MOIETY` relationship. **RxNorm and openFDA are out of scope** | `12 §B`, `16` |
 | Artifact | Custom mmap'd flat file, Ed25519 detached signature | `04 §6` |
 
-Effort baseline: **39–46.5 engineering person-weeks**, 7–9.3 clinical, 1.5–2.5
+Effort baseline: **37–44.5 engineering person-weeks**, 7–9.3 clinical, 1.5–2.5
 pharmacy, ~7 months calendar with two engineers (`07-effort.md`). The effort
 table's subtotal is the sum of its rows — keep it that way when rows change.
 

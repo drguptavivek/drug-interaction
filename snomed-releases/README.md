@@ -83,7 +83,7 @@ CDCI=snomed-releases/<CDCI package>/Snapshot
 ### Q22 — is there a UNII map reference set?
 
 The one that decides how load-bearing RxNorm is
-([12 §B1](../docs/plan/12-terminology-tooling.md#b1-why-rxnorm-may-be-load-bearing-not-optional)).
+([12 §B1](../docs/plan/12-terminology-tooling.md#b2-what-dropping-rxnorm-actually-costs)).
 
 ```bash
 ls "$INTL"/Refset/Map/                                   # what map refsets ship at all

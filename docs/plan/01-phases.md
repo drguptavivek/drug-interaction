@@ -79,10 +79,10 @@ a smaller, better-defined and still clinically valuable system.
 
 **Work**
 - Python ETL stages `acquire` → `stage` → `normalize` (see [04](04-etl-pipeline.md)).
-- Stand up **Snowstorm** with the International Release + India extension, for
-  ECL, description search and the terminologist's browser. Build the ECL
-  expansion cache and wire it into CI. See [12 Part A](12-terminology-tooling.md#part-a--terminology-server).
-  Needs a 16 GB build machine — request it in Phase 0.
+- Wire the **ECL expansion cache** to BHTS/CSNOServ and into CI. No Snowstorm
+  standup: **CSNOServ is Snowstorm**, with the Indian extensions already loaded
+  ([12 §A3](12-terminology-tooling.md#a3-which-server--settled)). Using BHTS
+  hosted for curation means no Elasticsearch stack for us to operate.
 - Load SNOMED RF2 snapshot (International + India extension) into PostgreSQL:
   `concept`, `description`, `relationship`, `refset` tables, release-tagged.
 - Materialise the substance sub-hierarchy (`105590001 | Substance |` descendants)
@@ -92,9 +92,10 @@ a smaller, better-defined and still clinically valuable system.
   `has precise active ingredient` (762949000), `has basis of strength substance`
   (732943007), plus dose form and route.
 - Normalize DDInter into `ddinter_drug` and `ddinter_interaction`.
-- Load UNII/GSRS names, WHO ATC index, openFDA label extracts, ONCHigh list.
-- Load RxNorm (`SAB=RXNORM` only): `IN`/`PIN`/`MIN` graph, SNOMEDCT_US atoms,
-  DrugBank cross-references, UNII attributes. See [12 Part B](12-terminology-tooling.md#part-b--rxnorm).
+- Load the WHO ATC index (from DDInter's own ATC assignments — do not purchase) and the ONCHigh list.
+- Load **GSRS**: UNII codes, substance names and synonyms, and the
+  `ACTIVE MOIETY` relationships. RxNorm and openFDA are out of scope
+  ([12 Part B](12-terminology-tooling.md#part-b--rxnorm-dropped-gsrs-instead)).
 - Build the anchor tables.
 
 **Exit criteria**

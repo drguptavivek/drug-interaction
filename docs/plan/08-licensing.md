@@ -22,8 +22,8 @@ retrieved is stored in `licence.retrieved_text` for exactly that reason.
 | **openFDA / FDA label data** | US Government work, public domain | Yes | Yes | Evidence display only, not a rule source |
 | **UNII / FDA GSRS** | Public domain | Yes | Yes | Anchor |
 | **WHO ATC index** | WHO copyright; use permitted, redistribution of the full index restricted | Yes for internal mapping | **Codes yes, full index no** | Ship codes, not the index |
-| **RxNorm** (`SAB=RXNORM`) | UMLS Metathesaurus Licence (free, UTS registration) | Yes | RXCUIs and RxNorm term types: yes, with attribution | §5A — promoted to a structural anchor |
-| **RxNorm, proprietary source vocabularies** (MMSL, GS, NDDF, MDDB, …) | Source-specific, restricted | Present in the release | **No** | Filtered out at ingest, not merely unused |
+| ~~**RxNorm**~~ | UMLS Metathesaurus Licence | — | — | **Out of scope.** GSRS replaces it ([12 §B](12-terminology-tooling.md#part-b--rxnorm-dropped-gsrs-instead)); the UMLS licence and its proprietary-source filtering problem go with it |
+| **GSRS / UNII** (NCATS) | Public domain | Yes | Yes | §5A — the substance authority: UNII codes, names, and the `ACTIVE MOIETY` relationship |
 
 ## 2. The CC BY-NC-SA ShareAlike obligation — and why the KB must not be embedded
 
@@ -262,26 +262,27 @@ as a rule source. If the census shows a genuinely large gap, the honest options
 are an institution-authored rule set (fully ours, freely publishable) or a
 licensed commercial source — not a licence-breaching workaround.
 
-## 5A. RxNorm
+## 5A. GSRS / UNII
 
-Two things ship in one download and must be separated at ingest.
+GSRS is NCATS's Global Substance Registration System — the system that issues
+UNIIs. Public domain, no account, no redistribution restriction. It replaces
+RxNorm in this design.
 
-| | RxNorm proper (`SAB=RXNORM`) | Proprietary source vocabularies in the same release |
-|---|---|---|
-| Examples | RXCUIs, `IN`/`PIN`/`MIN`/`SCD` term types, RxNorm normal forms | MMSL, GS, NDDF, MDDB |
-| Redistributable | Yes, with NLM attribution | **No** |
-| Used here | Structural anchor path, IN/PIN collapse cross-check, UNII derivation | Nothing |
+| Used for | Notes |
+|---|---|
+| UNII codes | The anchor. Source rather than a relay |
+| Substance names and synonyms | Retriever R5 |
+| **`ACTIVE MOIETY` relationship** | Normalises UNII to a consistent level across both spokes, **and** cross-checks salt-versus-prodrug collapse — the highest clinical-safety risk in the design ([C4](11-challenges-to-the-brief.md#c4)) |
 
-Mechanism: filter to `SAB=RXNORM` at ingest — proprietary atoms never enter the
-staging database at all, so they cannot leak into an artifact by oversight. The
-`verify` stage asserts it independently. Brand term types (`BN`, `SBD`) are
-discarded for a separate reason: they are a false-evidence source for an Indian
-formulary ([12 §B4](12-terminology-tooling.md#b4-the-tightening-ingredient-level-only-never-brand)),
-not a licensing problem.
+Everything here may be shipped in the artifact and published openly. That is a
+simplification over RxNorm, which required `SAB=RXNORM` filtering to keep
+proprietary source vocabularies out of the build.
 
-Why RxNorm's role grew: it may be the only available derivation of the
-SNOMED-side UNII anchor, and it provides an independent opinion on salt/moiety
-collapse. See [12 Part B](12-terminology-tooling.md#part-b--rxnorm).
+**RxNorm and openFDA are out of scope** ([12 §B](12-terminology-tooling.md#part-b--rxnorm-dropped-gsrs-instead)).
+With them go the UMLS Metathesaurus Licence, the UTS account, and the
+proprietary-source filtering requirement. The `RXCUI` member stays in the
+`anchor_type` enum so international interoperability can be added later without a
+migration, but nothing populates it.
 
 ## 3.6 Affiliate licensing in practice: who needs one, and what it costs
 
@@ -504,9 +505,8 @@ Contains SNOMED CT content, used under the SNOMED CT Affiliate Licence via
   trademark of SNOMED International. This artifact may only be used by
   parties holding a valid SNOMED CT licence.
 
-Contains RxNorm content courtesy of the U.S. National Library of Medicine
-  (RXCUIs and RxNorm term types only; no proprietary source vocabulary content).
-Contains UNII data and FDA drug label data, which are in the public domain.
+Contains UNII and substance data from the FDA/NCATS Global Substance
+  Registration System, which is in the public domain.
 Contains ATC codes, © World Health Organization Collaborating Centre for
   Drug Statistics Methodology.
 

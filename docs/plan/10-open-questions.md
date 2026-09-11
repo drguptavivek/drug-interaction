@@ -119,18 +119,16 @@ Service — is live at `nrces.in/bhts` with a FHIR-compliant API at
 search-and-browse UI. **CSNOServ** has been available since 2014 as a locally
 deployable service, part of the **Apache-2.0** CSNOtk toolkit, carrying the
 Indian extensions (AYUSH, CDCI) pre-integrated. Ontoserver is out of
-consideration. See [12 §A3](12-terminology-tooling.md#a3-which-server--revised-after-the-nrces--c-dac-findings).
+consideration. See [12 §A3](12-terminology-tooling.md#a3-which-server--settled).
 
 ### Q27
-**Does CSNOServ's API support ECL?**
-Blocks: whether Snowstorm is needed at all.
-Owner: Terminologist + engineering. **~Half a day against the live endpoint.**
-ECL was the whole case for standing up Snowstorm ([12 §A2](12-terminology-tooling.md#a2-build-and-curation-time-yes-and-it-is-better-than-my-first-draft)).
-If CSNOServ does ECL — via FHIR `ValueSet/$expand` with an ECL filter, or
-natively — the 2.0 eng-weeks budgeted for a Snowstorm standup and the 16 GB build
-machine both disappear. **Check the API, not the browser**: CSNOFinder browsing
-works regardless and tells you nothing about ECL. Full check-list in
-[12 §A5](12-terminology-tooling.md#a5-what-to-check-before-committing-phase-0-half-a-day).
+**~~Does CSNOServ support ECL?~~ Yes — CSNOServ is Snowstorm.** *(narrowed)* What remains is
+the practical endpoint shape: FHIR `ValueSet/$expand` with an ECL filter, or a
+native ECL endpoint? The ECL client needs to know either way, and it is an hour
+against the live endpoint, not an evaluation.
+Owner: Engineering.
+Also worth noting while there: rate limits and bulk suitability, since a
+~5,000-row drug master may be resolved against it in a batch.
 
 ### Q28
 **~~Is SNOMED International Affiliate registration in place, via MLDS?~~ — CLOSED.**
@@ -148,25 +146,31 @@ Two consequences that are now live rather than future:
   see [Q30](#q30). Due 15 January.
 
 ### Q22
-**Does the SNOMED release we will use ship a UNII map reference set?**
-Blocks: the anchor design's SNOMED-side derivation path.
-Owner: Terminologist.
-Why it matters more than it looks: the third-anchor check is the control that
-detects spoke disagreement, and it needs UNII computed *independently* down the
-SNOMED side. If no UNII refset exists, that derivation has to come from RxNorm
-(`SCTID → RXCUI → UNII`), which makes RxNorm structurally necessary rather than
-optional. See [12 §B1](12-terminology-tooling.md#b1-why-rxnorm-may-be-load-bearing-not-optional).
-Default if unanswered: ingest RxNorm regardless and treat it as the primary
-derivation.
+**Does the SNOMED release ship a UNII map reference set?** — *first-week item, now with no fallback.*
+Blocks: the strength of the third-anchor check.
+Owner: Terminologist. **A `grep` against files already on the laptop.**
+
+With RxNorm dropped there is no `SCTID → RXCUI → UNII` fallback. Either the
+refset exists and the SNOMED-side UNII anchor is structural, or it does not and
+that side becomes a name match against GSRS substance names — at which point
+**both** spokes derive UNII partly by name, and agreement is weaker evidence than
+the design assumes.
+
+| Outcome | Action |
+|---|---|
+| Refset present | No change. F3 keeps weight 25 |
+| Refset absent | F3 drops to 15; raise ATC set-overlap (F4) and corroboration (F5); route more molecules to band B for human adjudication. **Do not keep treating UNII agreement as a strong signal** |
+
+Recipe: [`snomed-releases/README.md`](../../snomed-releases/README.md#q22--is-there-a-unii-map-reference-set).
+Check for an **ATC** map refset in the same listing while you are there
+([16 §2](16-source-checklist.md#2-atc--the-licensing-trap-and-why-you-probably-do-not-need-to-buy-it)).
 
 ### Q23
-**Does DDInter publish DrugBank cross-references, and does the RxNorm release
-carry `DRUGBANK` as a source vocabulary?**
-Blocks: retriever R8, the structural `DDInter → DrugBank → RXCUI → SCTID` path.
-Owner: Engineering.
-If both hold, spoke B links to spoke A with no string matching at all — much
-stronger evidence than any name-similarity score. If either fails, R8 degrades
-to name matching and nothing else in the design changes.
+**~~Does DDInter publish DrugBank cross-references, and does RxNorm carry
+`DRUGBANK`?~~ — WITHDRAWN.**
+Moot: RxNorm is out of scope, so the structural `DDInter → DrugBank → RXCUI →
+SCTID` path it supported does not exist. GSRS replaces RxNorm's other two roles
+([12 §B1](12-terminology-tooling.md#b1-why-rxnorm-was-proposed-and-why-gsrs-covers-it)).
 
 ### Q29
 **Does a site that deploys only the `codes-only` KB need its own Affiliate

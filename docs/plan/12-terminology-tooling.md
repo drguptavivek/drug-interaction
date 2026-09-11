@@ -84,54 +84,36 @@ Three further benefits, in descending order of importance:
    IG world expects. Not needed by `ddid`, but if AIIMS wants a terminology
    service for other purposes, this is the same box.
 
-### A3. Which server — revised after the NRCeS / C-DAC findings
+### A3. Which server — settled
 
-My first draft read "csnotc" as CSIRO **Ontoserver** and compared it against
-Snowstorm. That was the wrong comparison. The actual options are India's own
-national terminology services, and they change the recommendation.
+**CSNOServ is Snowstorm.** C-DAC's CSNOtk packages the same terminology server
+SNOMED International develops, with the Indian extensions (AYUSH, CDCI)
+pre-integrated and an Apache-2.0 licence. That collapses what I had written as a
+three-way choice:
 
-| Option | What it is | Carries Indian extensions? | Ops weight |
-|---|---|---|---|
-| **CSNOServ (locally deployed)** | C-DAC's SNOMED CT terminology service, part of the **CSNOtk** toolkit (**Apache-2.0**, © 2014 C-DAC), progressively enriched with Indian extensions — AYUSH and the **CDCI clinical drug codes** | **Yes, pre-integrated** | Unknown; to evaluate |
-| **BHTS** (`nrces.in/bhts`, API at `/bhts/api/v1/csnoserv/`) | The national **Bharat Health Terminology Service** — a hosted, FHIR-compliant terminology server with open API access | Yes | **None** (hosted) |
-| **Snowstorm** (SNOMED International) | Apache-2.0, what SNOMED International runs | No — we would import them ourselves | Heavy: JVM + Elasticsearch, ~16 GB RAM |
-| **Ontoserver** (CSIRO) | Commercial | No | Moderate |
-| **RF2 → PostgreSQL** | Bulk staging | n/a | Light |
+| Option | Verdict |
+|---|---|
+| **CSNOServ / BHTS** | **Use this.** Snowstorm capability — full ECL, dialect-aware description search — with the Indian content already loaded and the extension dependency ordering already done |
+| Standing up our own Snowstorm | **Dropped.** Same software, and we would be re-importing content NRCeS has already assembled |
+| Ontoserver | Dropped — no reason to procure a commercial server |
+| RF2 → PostgreSQL | **Keep as the bulk staging layer**, as before |
 
-**Revised recommendation, in priority order:**
+Consequences:
 
-1. **Evaluate CSNOServ locally deployed first.** It is the natural fit: it already
-   carries the Indian extensions including the CDCI drug codes, which is exactly
-   the content this project needs, and it removes the extension
-   dependency-ordering work budgeted for a Snowstorm import. If it supports ECL
-   (§A5), it replaces Snowstorm outright.
-2. **Use BHTS for interactive curation lookup.** Hosted, national, zero ops cost,
-   always current. Ideal for the maker/checker/terminologist working a queue.
-3. **Snowstorm as the fallback** for the build-side materialisation if CSNOServ's
-   ECL support turns out to be insufficient.
-4. **PostgreSQL staging in all cases**, for the relational joins, anchors and
-   proposals in [02](02-data-model.md).
-
-Ontoserver drops out of consideration — there is no reason to procure a
-commercial server when the national service exists, is free to Indian users, and
-is open source.
-
-**CSNOtk is Apache-2.0** (© 2014 C-DAC), with components `CSNOLib`, `CSNOFinder`,
-`CSNOServ` and `CSNOCtrl`. That is the same licence as our own `ddid`, so
-deploying, modifying and integrating it raises no procurement or
-copyleft question.
-
-Note the shape of it, because it is the same split this plan makes for its own
-artifact ([C1](11-challenges-to-the-brief.md#c1)): **the software is Apache-2.0,
-the SNOMED CT content it serves is separately governed** by the sub-licence in
-§A7. C-DAC separated code from licensed data for exactly the reason we separate
-`ddid` from `kb.ddi`. Useful precedent when that decision is questioned.
-
-**One thing the Apache licence does not make safe:** linking `CSNOLib` into
-`ddid`. The constraint on the runtime is not the code licence — it is the offline
-property and the SNOMED content, neither of which an Apache-2.0 header changes.
-"It's open source, just embed the library" is the most plausible-sounding way to
-breach §A1, and the answer is still no.
+- **ECL is available.** That was the whole argument for a terminology server
+  ([§A2](#a2-build-and-curation-time-yes-and-it-is-better-than-my-first-draft)),
+  and it is satisfied without a separate standup. [Q27](10-open-questions.md#q27)
+  narrows from "does it do ECL" to the practical "what is the endpoint shape" —
+  a FHIR `ValueSet/$expand` with an ECL filter, or a native ECL endpoint — which
+  the ECL client needs to know regardless.
+- **The 2.0 eng-weeks for a Snowstorm standup come out of the estimate.**
+- **The hardware does not automatically come out.** Snowstorm means
+  Elasticsearch, so a *locally deployed* CSNOServ still wants roughly 16 GB. The
+  16 GB machine is avoidable only if curation uses **BHTS hosted** and the build
+  consumes the ECL expansion cache (§A4) rather than a local instance. That is
+  the recommended shape: hosted for humans, cache for the build, no server we
+  operate.
+- **Rule 4 is untouched.** None of this reaches runtime.
 
 ### A4. Reproducibility — the constraint that shapes the integration
 
@@ -275,140 +257,100 @@ affiliate status covers both sides of the boundary, not just ours.
 
 ---
 
-## Part B — RxNorm
+## Part B — RxNorm dropped; GSRS instead
 
-The brief says RxNorm is "secondary, for international interoperability only."
-**I would upgrade that** — and simultaneously tighten it. Both changes matter.
+**Decision: RxNorm and openFDA are out of scope. GSRS becomes the substance
+authority.**
 
-### B1. Why RxNorm may be load-bearing, not optional
+### B1. Why RxNorm was proposed, and why GSRS covers it
 
-The anchor design in [02 §5](02-data-model.md#5-anchors) depends on computing
-UNII **independently down each spoke**. The SNOMED side of that was assumed to
-come from a UNII map reference set in the release. I am not confident that map
-exists in the International Release — it needs Phase 0 verification
-([Q22](10-open-questions.md#q22)).
+I had argued RxNorm up from the brief's "interoperability only" on three grounds.
+GSRS — NCATS's Global Substance Registration System, the system that *issues*
+UNIIs — answers all three more directly:
 
-If it does not exist, the SNOMED-side UNII anchor has no derivation path, and the
-third-anchor check — the thing that detects spoke disagreement, the control the
-whole hub-and-spoke model leans on — quietly stops working.
-
-**RxNorm supplies that path.** RxNorm carries `SNOMEDCT_US` atoms (substance
-concepts are International core, so the SCTIDs are the same ones we map to) and
-UNII codes as concept attributes. So:
-
-```
-SCTID ──(RxNorm SNOMEDCT_US atom)──► RXCUI ──(RxNorm UNII attribute)──► UNII
-```
-
-That is a genuine, independent derivation of the SNOMED-side UNII. It is not
-"interoperability" — it is the anchor design's fallback leg, and possibly its
-only leg.
-
-### B2. RxNorm as an independent check on the riskiest decision
-
-[C4](11-challenges-to-the-brief.md#c4) — automated salt/moiety collapse — is the
-highest clinical-safety risk in the design. RxNorm has a directly relevant
-structure, built by humans for the same purpose:
-
-| RxNorm term type | Meaning | Our equivalent |
+| What RxNorm was for | GSRS equivalent | Better or worse |
 |---|---|---|
-| `IN` | Ingredient | moiety (the `ingredient` hub) |
-| `PIN` | Precise ingredient | salt / specific form |
-| `MIN` | Multiple ingredients | FDC ingredient set |
+| UNII derivation | GSRS **is** the UNII registry | **Better** — source rather than a relay |
+| `IN` / `PIN` split as an independent check on salt vs moiety | GSRS **ACTIVE MOIETY** relationship | **Better** — a regulatory substance determination, not a vocabulary convention |
+| Structural `DDInter → DrugBank → RXCUI → SCTID` path | — | **Lost**, see B2 |
 
-with `has_precise_ingredient` / `form_of` relating PIN to IN.
+The second row matters most. Salt-versus-prodrug collapse is the highest
+clinical-safety risk in the design ([C4](11-challenges-to-the-brief.md#c4)), and
+GSRS's active-moiety relationship is a stronger second opinion on it than
+RxNorm's IN/PIN was.
 
-So RxNorm's IN/PIN split is a **second, independently curated opinion** on
-exactly the question SNOMED's `Is modification of` answers ambiguously. Where the
-two agree, confidence rises sharply. Where they disagree — RxNorm treats
-something as a distinct ingredient that SNOMED marks as a modification — that is
-precisely the ester/prodrug/complex case that must not be auto-collapsed.
+openFDA is dropped outright: it was scoped to curator evidence display only,
+never a rule source, and cost several gigabytes for that.
 
-This is a better `derivation_kind` signal than the FSN-morphology heuristics in
-[04 §3.1](04-etl-pipeline.md#31-substance-graph-and-closure), and it is cheap.
-It should be added there as a feature.
+### B2. What dropping RxNorm actually costs
 
-### B3. RxNorm as a bridge to DDInter
+Two things, one minor and one that needs watching.
 
-DDInter is substantially DrugBank-derived and — to verify in Phase 0
-([Q23](10-open-questions.md#q23)) — likely publishes DrugBank cross-references.
-Recent RxNorm releases carry `DRUGBANK` as a source vocabulary. If both hold:
+**Minor — RXCUI in responses.** International interoperability only. The `RXCUI`
+member stays in the `anchor_type` enum ([02 §5](02-data-model.md#5-anchors)) so it
+can be populated later without a migration, but nothing produces it.
 
-```
-DDInter ID ──► DrugBank ID ──► RXCUI ──► SNOMEDCT_US ──► SCTID
-```
+**Watch this — the SNOMED side of the UNII anchor.** The third-anchor check works
+by deriving UNII **independently down each spoke** and comparing. GSRS gives the
+DDInter side cleanly (drug name → GSRS substance → UNII). The SNOMED side needs
+`SCTID → UNII`, and there were two routes: a SNOMED UNII map refset, or
+`SCTID → RXCUI → UNII`. Dropping RxNorm removes the second.
 
-A **structural** path from spoke B to spoke A that involves no string matching at
-all. That is far stronger evidence than any name-similarity score, and it is a
-genuinely independent retriever.
+So **[Q22](10-open-questions.md#q22) is now load-bearing on its own**:
 
-If either link fails to materialise, the path degrades gracefully to name
-matching and nothing else in the design changes.
-
-### B4. The tightening: ingredient level only, never brand
-
-RxNorm's limitation is real and the brief is right to be cautious — it just
-locates the caution in the wrong place.
-
-| RxNorm content | Use? | Why |
+| Q22 outcome | SNOMED-side UNII anchor | Consequence |
 |---|---|---|
-| `IN` / `PIN` / `MIN` (ingredient level) | **Yes** — structural anchor, collapse check | Ingredients are chemistry, not market |
-| `SCD` / `SBD` (clinical/branded drug) | **No** | US market products; irrelevant to an Indian formulary |
-| Brand names (`BN`) | **Prohibited** | Indian and US brand names collide frequently for entirely different molecules. A brand-name match is a *false-evidence generator*, worse than no evidence, because it looks like corroboration |
+| UNII map refset **present** | Structural, from the refset | No change — the anchor design works as written |
+| UNII map refset **absent** | Name match: SNOMED FSN ↔ GSRS substance name | **Both spokes now derive UNII partly by name**, so agreement is weaker evidence than intended |
 
-The risk the brief senses is real, but it lives in the brand layer, not the
-ingredient layer. Blocking brands and promoting ingredients gets both halves
-right.
+In the second case the third anchor is degraded rather than gone, and the
+mitigation is proportionate: raise the weight of ATC set-overlap (F4) and
+retriever corroboration (F5) to compensate, and route more molecules to band B
+so a human adjudicates. Do **not** silently keep treating UNII agreement as the
+strong signal it was designed to be.
 
-### B5. Consequent changes to the ranking algorithm
+**This makes Q22 a first-week Phase 0 item**, not a curiosity — it is a `grep`
+against files already on the laptop
+([`snomed-releases/README.md`](../../snomed-releases/README.md#q22--is-there-a-unii-map-reference-set)).
 
-Two changes to [03](03-candidate-ranking.md):
+### B3. GSRS: deploy, or just take the data?
 
-**A new retriever, structural rather than lexical:**
+NCATS publishes GSRS as deployable software (`ncats/gsrs3-main-deployment`) and
+the UNII substance data as downloadable files.
 
-| ID | Retriever | Notes |
+| | Use for | Cost |
 |---|---|---|
-| R8 | RxNorm structural: `DDInter → DrugBank → RXCUI → SNOMEDCT_US → SCTID`, and `SCTID → RXCUI → UNII` | High precision; no string matching; may be the primary UNII derivation |
+| **Data export** (UNII list + substance relationships) | The build. Pinned, checksummed, reproducible — a running server is not a pinned file ([§A4](#a4-reproducibility--the-constraint-that-shapes-the-integration)) | Small |
+| **Local deployment** | Curator lookup during Phase 3: structure search, synonym exploration, moiety relationships | Another Java/DB stack to operate |
 
-**New scoring features:**
+**Recommendation: data export for the build, and deploy GSRS only if curators ask
+for it.** Same pattern as CSNOServ — hosted or offline lookup for humans, pinned
+files for the build. The must-have is that the export includes the **substance
+relationships**, not just the flat UNII code list; the active-moiety relationship
+is the whole point ([16 §3](16-source-checklist.md#3-free-no-account-fetch-when-convenient)).
 
-| # | Feature | Range | `w_i` | Notes |
-|---|---|---|---|---|
-| F10 | RxNorm structural path corroborates the candidate (R8) | 0/1 | **20** | Comparable to UNII agreement — it is often the same evidence |
-| F11 | RxNorm IN/PIN agrees with the proposed `derivation_kind` | 0/1 | 8 | Independent second opinion on collapse |
-| P6 | RxNorm treats as a distinct `IN` what SNOMED marks as a modification | 0/1 | **−20** | Strong prodrug/ester signal; blocks band A |
+### B4. Consequent changes to the ranking algorithm
 
-Existing R7 (RxNorm *name* matching) keeps its −20 penalty and its "never a sole
-basis" rule. The distinction is the point: the **structural** path is strong
-evidence, the **lexical** path is weak and dangerous. The brief collapsed both
-into "secondary"; they deserve opposite treatment.
+Retrievers R7 (RxNorm lexical) and R8 (RxNorm structural) are **removed**;
+R5 absorbs their role:
 
-### B6. Licensing
+| ID | Retriever | Change |
+|---|---|---|
+| R5 | **GSRS** — substance name and synonym match, then UNII → SNOMED via the map refset if present, else FSN name match | Strengthened; now the primary anchor path |
 
-| | Position |
-|---|---|
-| Access | RxNorm full monthly release, free, via a UMLS Terminology Services account |
-| Licence | UMLS Metathesaurus Licence. RxNorm's own content (`SAB=RXNORM`) is openly redistributable with attribution; **several source vocabularies inside the release are proprietary** (e.g. MMSL, GS, NDDF, MDDB) and are not |
-| What we may ship | RXCUIs and RxNorm term types. Nothing else |
-| What we must not ship | Atoms from restricted sources |
-| Mechanism | Same as SNOMED: filter to `SAB=RXNORM` at ingest, and add a `verify` assertion that no restricted-source atom reached the artifact |
-| Attribution | NLM attribution line added to `NOTICE` |
+Scoring features ([03 §4](03-candidate-ranking.md#4-stage-3--scoring)):
 
-This fits the existing compliance pattern in [08 §7](08-licensing.md#7-compliance-mechanics-not-compliance-promises)
-exactly — one more row in `source_release` with `redistributable` set per source
-vocabulary, and the build gate does the rest.
+| # | Feature | Change |
+|---|---|---|
+| F10 | ~~RxNorm structural path corroborates~~ | **Removed** |
+| F11 | RxNorm IN/PIN agrees with `derivation_kind` | **Re-based on GSRS ACTIVE MOIETY**, weight raised 8 → 12 |
+| P4 | ~~Supported by R7 only~~ | **Removed** |
+| P6 | ~~RxNorm treats as a distinct IN~~ | **Re-based**: GSRS records a distinct substance where SNOMED asserts a modification. Weight unchanged at −20 |
+| F3 | UNII agreement | **Conditional on [Q22](10-open-questions.md#q22)** — weight 25 if the refset exists, 15 if both sides are name-derived |
 
-### B7. Cost
-
-| | Eng-weeks |
-|---|---|
-| RxNorm ingest (RRF parsing, `SAB` filtering, IN/PIN graph) | +0.5 |
-| R8 structural retriever + F10/F11/P6 features | +0.5 |
-| **Net** | **+1.0** |
-
-Against that: it de-risks [R3](09-risks.md) (prodrug mis-collapse, score 15) and
-may rescue the entire anchor design if the SNOMED UNII refset turns out not to
-exist. Clearly worth it.
+Six retrievers now, not eight. The brand-name prohibition becomes moot with
+RxNorm gone, but keep the principle: **no brand-name evidence from any source**,
+because Indian and US brand names collide for different molecules.
 
 ---
 
@@ -416,10 +358,12 @@ exist. Clearly worth it.
 
 | Change | Where |
 |---|---|
-| Terminology server is a **build/curation** dependency, never runtime | [05 §7](05-go-service.md#7-configuration-and-overlay-loading) unchanged and now explicit |
-| Snowstorm added to Phase 1; ECL expansion cache added to the ETL | [01](01-phases.md), [04](04-etl-pipeline.md) |
-| RxNorm promoted from "interoperability" to structural anchor and collapse check | [03](03-candidate-ranking.md) |
-| RxNorm brand layer explicitly prohibited | [03](03-candidate-ranking.md) |
-| UMLS/RxNorm licence row, `SAB=RXNORM` filter, verify assertion | [08](08-licensing.md) |
-| Engineering estimate 42.5 → 44.5 person-weeks | [07](07-effort.md) |
-| Four new open questions (Q20–Q23) | [10](10-open-questions.md) |
+| Terminology server is a **build/curation** dependency, never runtime | [05 §7](05-go-service.md#7-configuration-and-overlay-loading) — unchanged and now explicit |
+| CSNOServ **is** Snowstorm; separate Snowstorm standup dropped (−2.0 eng-weeks) | [01](01-phases.md), [07](07-effort.md) |
+| BHTS hosted for curation + ECL expansion cache for the build ⇒ no 16 GB machine we operate | [§A3](#a3-which-server--settled) |
+| **RxNorm and openFDA dropped**; GSRS becomes the substance authority | [16](16-source-checklist.md) |
+| GSRS ACTIVE MOIETY replaces RxNorm IN/PIN as the salt-collapse cross-check | [04 §3.1](04-etl-pipeline.md#31-substance-graph-and-closure) |
+| Retrievers 8 → 6; F10/P4 removed; F11/P6 re-based on GSRS; F3 weight conditional on Q22 | [03](03-candidate-ranking.md) |
+| **Q22 is now load-bearing on its own** — no RxNorm fallback for the SNOMED-side UNII anchor | [10](10-open-questions.md#q22) |
+| Q23 (DrugBank cross-refs in RxNorm) withdrawn; Q27 narrowed to endpoint shape | [10](10-open-questions.md) |
+| Engineering 46.5 → 44.5 person-weeks for the core build | [07](07-effort.md) |

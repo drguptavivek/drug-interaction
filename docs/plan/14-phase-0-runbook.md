@@ -16,7 +16,7 @@ it is done.
 | SNOMED release files | **Downloaded, on the developer laptop**, gitignored |
 | India extension supplies products; International supplies substances | **Confirmed** ([Q2](10-open-questions.md#q2)) |
 | CDCI is RF2 with real drug-model structure, via MLDS | **Confirmed** ([Q4](10-open-questions.md#q4)) |
-| Terminology server: prefer CSNOServ / BHTS; Snowstorm fallback; **never at runtime** | **Decided** ([12 §A3](12-terminology-tooling.md#a3-which-server--revised-after-the-nrces--c-dac-findings)) |
+| Terminology server: prefer CSNOServ / BHTS; Snowstorm fallback; **never at runtime** | **Decided** ([12 §A3](12-terminology-tooling.md#a3-which-server--settled)) |
 | KB ships as a signed sidecar, not `go:embed` | **Decided** ([11 C1](11-challenges-to-the-brief.md#c1)) |
 | CredibleMeds not shipped; site-supplied overlay | **Decided** ([11 C2](11-challenges-to-the-brief.md#c2)) |
 | HMIS-neutral; SCTIDs supplied by the caller | **Decided** ([13](13-hmis-neutral-integration.md)) |

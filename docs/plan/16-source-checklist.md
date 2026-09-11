@@ -16,36 +16,29 @@ the payloads never are.**
 | 1 | **SNOMED CT International RF2** | Substance hierarchy, spoke A, `Is modification of`, historical associations | MLDS | ✅ **have** |
 | 2 | **CDCI / SNOMED CT India** | The entire product layer, FDC decomposition | MLDS | ⚠️ **confirm access** |
 | 3 | **DDInter 2.0** | All four content types | none | ⏳ downloading |
-| 4 | **RxNorm** | Structural anchor, IN/PIN collapse check, possibly the only UNII path | **UTS — start now** | ❌ |
-| 5 | **UNII / FDA GSRS** | Anchor, salt→parent relationship | none | ❌ |
-| 6 | **ATC** | Anchor, tiering | *see §2 — do not buy* | ❌ |
-| 7 | **NLEM 2022 (India)** | Indian-market prior (F7); PHC/CHC overlay | none | ❌ |
-| 8 | **ONCHigh** | The "always alert" tier | none | ❌ |
-| 9 | **DrugBank Open Data** | Name/synonym vocabulary only | none | ❌ |
-| 10 | **openFDA labels** | Curator evidence display only | none | 🔽 **low priority** |
-| 11 | **CredibleMeds** | TdP overlay — **never shipped** | registration | optional |
-| 12 | **AIIMS drug master** | [Q24](10-open-questions.md#q24); the coding exercise | institutional | ❌ **ask now** |
-| 13 | **CSNOtk / CSNOServ** | Local terminology service (Apache-2.0) | none | after [Q27](10-open-questions.md#q27) |
+| 4 | **GSRS / UNII** (NCATS) | UNII anchor, **ACTIVE MOIETY** relationship — the salt-collapse cross-check | none | ❌ **now the key one** |
+| 5 | **ATC** | Anchor, tiering | *see §2 — do not buy* | ❌ |
+| 6 | **NLEM 2022 (India)** | Indian-market prior (F7); PHC/CHC overlay | none | ❌ |
+| 7 | **ONCHigh** | The "always alert" tier | none | ❌ |
+| 8 | **DrugBank Open Data** | Name/synonym vocabulary only | none | ❌ |
+| ~~9~~ | ~~**openFDA labels**~~ | — | — | ❌ **dropped** |
+| 10 | **CredibleMeds** | TdP overlay — **never shipped** | registration | optional |
+| 11 | **AIIMS drug master** | [Q24](10-open-questions.md#q24); the coding exercise | institutional | ❌ **ask now** |
+| 12 | **BHTS / CSNOServ** | Terminology service — **is Snowstorm**, Indian extensions pre-integrated | none | hosted; local deploy optional |
 
 ---
 
 ## 1. Start these today — they have lead times
 
-### RxNorm — needs a UMLS Terminology Services account
+### Q22 — settle it this week, it is now load-bearing
 
-The account is free but registration is not instant, and RxNorm may be
-**structurally necessary**: if the SNOMED release ships no UNII map refset
-([Q22](10-open-questions.md#q22)), `SCTID → RXCUI → UNII` is the only derivation
-of the SNOMED-side UNII anchor ([12 §B1](12-terminology-tooling.md#b1-why-rxnorm-may-be-load-bearing-not-optional)).
+Not a download, but it belongs at the top. With RxNorm dropped there is **no
+fallback** for deriving UNII on the SNOMED side: either the release ships a UNII
+map refset, or that half of the third anchor becomes name-derived and the anchor
+check weakens ([12 §B2](12-terminology-tooling.md#b2-what-dropping-rxnorm-actually-costs)).
 
-- [ ] UTS account requested at `uts.nlm.nih.gov`
-- [ ] **RxNorm Full Monthly Release** (not the weekly, not "current prescribable")
-- [ ] At ingest, **filter to `SAB=RXNORM`** — proprietary source vocabularies
-      (MMSL, GS, NDDF, MDDB) travel in the same download and must never reach the
-      artifact ([08 §5A](08-licensing.md#5a-rxnorm))
-- [ ] Discard `BN` / `SBD` brand term types at ingest — Indian and US brand names
-      collide for different molecules, so they are a false-evidence source
-- [ ] Check `DRUGBANK` is present as a source vocabulary ([Q23](10-open-questions.md#q23))
+It is a `grep` against files already on the laptop —
+[`snomed-releases/README.md`](../../snomed-releases/README.md#q22--is-there-a-unii-map-reference-set).
 
 ### CDCI — confirm it is available under the existing MLDS registration
 
@@ -76,15 +69,14 @@ have:
 
 | Route | Coverage |
 |---|---|
-| **DDInter** — assigns ATC codes to its drugs, and updated them in 2.0 | Every drug in the interaction set — which is exactly the set needing the anchor |
-| **RxNorm** — carries ATC as a source vocabulary | Cross-check, and broader |
-| **SNOMED** — an ATC map refset, if the release ships one | Check alongside [Q22](10-open-questions.md#q22) |
+| **DDInter** — assigns ATC codes to its drugs, and updated them in 2.0 | Every drug in the interaction set — exactly the set needing the anchor |
+| **SNOMED** — an ATC map refset, if the release ships one | Check alongside [Q22](10-open-questions.md#q22), same `Refset/Map/` listing |
 
 - [ ] Confirm ATC codes are present in the DDInter download
-- [ ] Confirm ATC is present in RxNorm under the existing UMLS licence
+- [ ] Check for an ATC map refset while answering Q22
 - [ ] Only if both fail, reconsider — and note that ATC is an *advisory* anchor
       compared with UNII ([11 C10](11-challenges-to-the-brief.md#c10)), so a gap
-      here is not fatal
+      here is not fatal. With RxNorm dropped, DDInter is the primary ATC route
 
 Remember ATC is **multi-valued** per moiety. Whichever route supplies it, retain
 **all** codes per substance and compare by set overlap, never equality.
@@ -93,14 +85,25 @@ Remember ATC is **multi-valued** per moiety. Whichever route supplies it, retain
 
 ## 3. Free, no account, fetch when convenient
 
-### UNII / FDA GSRS
-Public domain. The UNII list plus the substance relationships — specifically the
-**salt → parent moiety** relationship, which is what lets UNII be compared at a
-consistent level on both spokes ([03 §5](03-candidate-ranking.md#5-anchor-agreement-semantics)).
-Without it, every salt-listed DDInter drug produces a false anchor disagreement.
+### GSRS / UNII — now the most important free source
+Public domain, from NCATS. GSRS is the system that *issues* UNIIs, so it is the
+substance authority rather than a relay.
 
-- [ ] UNII list downloaded
-- [ ] Substance relationships included, not just the flat code list
+**Take the data export for the build.** A running server is not a pinned file,
+and the build must stay reproducible
+([12 §B3](12-terminology-tooling.md#b3-gsrs-deploy-or-just-take-the-data)).
+Deployable software exists at `ncats/gsrs3-main-deployment` — deploy it only if
+curators want structure search and synonym exploration during Phase 3.
+
+- [ ] UNII substance export downloaded and checksummed
+- [ ] **Substance relationships included, not just the flat UNII code list.**
+      This is the part that is easy to miss and expensive later: the
+      **ACTIVE MOIETY** relationship is what lets UNII be compared at a
+      consistent level on both spokes, and it is now also the independent
+      cross-check on salt-versus-prodrug collapse that RxNorm's IN/PIN was going
+      to provide ([12 §B1](12-terminology-tooling.md#b1-why-rxnorm-was-proposed-and-why-gsrs-covers-it))
+- [ ] Names and synonyms included — they feed retriever R5
+- [ ] Local GSRS deployment: **optional**, Phase 3, only on curator request
 
 ### NLEM 2022 — India's National List of Essential Medicines
 Free from MoHFW/CDSCO, usually a PDF, so budget for extraction. Two uses:
@@ -138,14 +141,11 @@ how a 15-entry "always alert" list quietly becomes 400 alerts.
 
 ## 4. Deprioritise
 
-### openFDA — large, and scoped to evidence display only
-Several GB of label JSON for something the plan already restricts to
-*corroborating evidence shown to curators*, never a rule source — free-text label
-mining produces rules nobody can defend at a mortality review
-([04 §3](04-etl-pipeline.md#3-normalize)).
-
-Fetch it in Phase 1 if curators ask for it, not in Phase 0. If you do, take only
-`drug_interactions`, `contraindications` and `warnings`.
+### openFDA — dropped
+Several GB of label JSON for something already restricted to *corroborating
+evidence shown to curators*, never a rule source. Out of scope. If a curator ever
+asks for label text on a specific molecule, they can look it up online; that does
+not justify ingesting the corpus.
 
 ### CredibleMeds — optional, and never shipped
 Register only if you want the TdP overlay at AIIMS. It is **site-supplied under
@@ -153,28 +153,33 @@ your own registration**, converted locally by `ddictl`, and never enters the
 build ([11 C2](11-challenges-to-the-brief.md#c2)). Registering is not a blocker
 for anything.
 
-### CSNOtk / CSNOServ — after Q27
-Apache-2.0, so no licensing question. Only worth deploying once you know whether
-its API does ECL ([Q27](10-open-questions.md#q27)); if it does, it replaces the
-Snowstorm standup entirely.
+### BHTS / CSNOServ — hosted first
+**CSNOServ is Snowstorm**, so ECL is available and the Indian extensions are
+already loaded. Use **BHTS hosted** for interactive curation and the ECL
+expansion cache for the build; that way there is no Elasticsearch stack for us to
+operate ([12 §A3](12-terminology-tooling.md#a3-which-server--settled)).
+[Q27](10-open-questions.md#q27) narrows to the practical question of endpoint
+shape, which the ECL client needs anyway.
 
 ---
 
 ## 5. Order of work
 
 ```
-TODAY      UTS account request  ·  confirm CDCI on MLDS  ·  ask for the drug master
-           (all have lead times and none depend on anything else)
+TODAY      confirm CDCI on MLDS  ·  ask for the AIIMS drug master
+           (both have lead times and neither depends on anything else)
 
-THIS WEEK  DDInter 2.0 → run ddinter/README.md recipe        → Q31, Q32
-           Unpack SNOMED → run snomed-releases/README.md     → Q2, Q22
-           UNII · NLEM · DrugBank Open Data · ONCHigh        (an afternoon)
+THIS WEEK  Unpack SNOMED → run snomed-releases/README.md     → Q2, Q22  ← do first
+           DDInter 2.0   → run ddinter/README.md recipe      → Q31, Q32
+           GSRS export (with relationships) · NLEM · DrugBank Open Data · ONCHigh
+           Check ATC inside DDInter, and for an ATC refset   → §2
 
-NEXT       RxNorm when the UTS account lands                 → Q23
-           Check ATC inside DDInter and RxNorm               → §2
-           sources.lock committed with every checksum
+NEXT       sources.lock committed with every checksum
            Coverage census (P7) — the gate
 ```
+
+Q22 moved to the front of the week: with RxNorm dropped it has no fallback, and
+it changes the weight of the UNII anchor in the ranker.
 
 ## 6. What "done" looks like
 
@@ -183,5 +188,6 @@ NEXT       RxNorm when the UTS account lands                 → Q23
 - [ ] Every payload in its gitignored directory; nothing licensed in git
 - [ ] `row_counts` recorded per source, so the build asserts them and a silent
       upstream change fails loudly
-- [ ] Q22, Q23, Q31, Q32 answered from the files
-- [ ] ATC sourced without purchase, or the gap consciously accepted
+- [ ] Q22, Q31, Q32 answered from the files
+- [ ] ATC sourced from DDInter without purchase, or the gap consciously accepted
+- [ ] GSRS export includes substance **relationships**, not just codes

@@ -15,8 +15,8 @@ snomed-releases/*
 ddinter/*
 !ddinter/.gitkeep
 !ddinter/README.md
-rxnorm/
-umls/
+gsrs/
+
 credible-meds/
 cdc-india/
 drugbank/

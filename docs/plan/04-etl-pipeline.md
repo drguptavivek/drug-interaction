@@ -59,18 +59,9 @@ same `artifact_sha256`.
   licence: SNOMED-IN-NATIONAL
   redistributable: false
   pairs_with: SNOMED_INT@2026-08     # package is synchronous with the Intl Edition
-- source: RXNORM
-  version: "2025-03"
-  sha256: "…"
-  licence: UMLS-METATHESAURUS
-  redistributable: partial          # SAB=RXNORM yes; proprietary source atoms no
 - source: UNII
   version: "2025-03"
   sha256: "…"
-  licence: PUBLIC-DOMAIN
-  redistributable: true
-- source: OPENFDA
-  version: "2025-03"
   licence: PUBLIC-DOMAIN
   redistributable: true
 - source: ONCHIGH
@@ -100,10 +91,10 @@ mechanism referenced in [C6](11-challenges-to-the-brief.md#c6).
 | DDInter | **Bulk download is split per ATC first level** (one CSV each), so a pair involving classes A and B appears in *both* files — union then deduplicate, and verify which ATC levels are actually published ([Q31](10-open-questions.md#q31)). Split the drug list from the pair list. **Assert** the drug and pair counts and record them; the brief's ~2,310 / ~302,000 are hypotheses (see [C3](11-challenges-to-the-brief.md#c3)). Canonicalise each pair to `(lo, hi)` by DDInter ID, drop exact duplicates, report non-exact duplicates (same pair, different severity) rather than silently picking one. |
 | SNOMED RF2 | Snapshot only, not Full. Load `concept`, `description`, `relationship`, `sct2_RelationshipConcreteValues`, plus the UNII/ATC simple map refsets if present. Keep `active=0` rows — inactivity is a fact the service needs, not noise to filter. |
 | CDC-India (CDCI) | RF2 Terminology Integrated Package: generic, supplier and branded (CD/RCD) medicine concepts. Load as a SNOMED extension, not as a code list — decomposition uses the same `has active ingredient` relationships as any other product. **Excludes devices, surgical implants and combi packs**; a combi pack drug master row has no single concept and must be decomposed into component products. Retain original strings. |
-| UNII / GSRS | Preferred substance name, all synonyms, and the salt→parent relationship. The latter is what allows UNII comparison at a consistent level (see [03 §5](03-candidate-ranking.md#5-anchor-agreement-semantics)). |
-| RxNorm | Filter to `SAB=RXNORM` at ingest — proprietary source atoms must never reach the artifact. Load `IN`/`PIN`/`MIN` and the `has_precise_ingredient`/`form_of` graph, SNOMEDCT_US atoms, DrugBank cross-references and UNII attributes. Brand term types (`BN`, `SBD`) are discarded at ingest, not merely unused. |
+
+| GSRS / UNII | Substance records, names and synonyms, and **the substance relationships** — above all `ACTIVE MOIETY`, which is both the level-normaliser for UNII comparison and the independent cross-check on salt-versus-prodrug collapse. A flat UNII code list is not sufficient. |
 | WHO ATC | Full index to level 5; retain **all** codes per substance. |
-| openFDA | Extract only the label sections plausibly relevant: `drug_interactions`, `contraindications`, `warnings`. Used as corroborating evidence displayed to curators, **not** as a rule source — free-text label mining produces rules nobody can defend at a mortality review. |
+
 | ONCHigh | ~15 drug-class pairs. Expand class→member using SNOMED substance descendants, then review the expansion by hand. Class expansion is where "always alert" lists quietly become 400 alerts. |
 
 ### 3.1 Substance graph and closure
@@ -127,15 +118,16 @@ collapse** — it produces the candidate set only, and every edge is classified:
 |---|---|---|
 | `salt` | Child FSN = parent FSN + a known counter-ion token (`sodium`, `hydrochloride`, `sulfate`, `maleate`, `besilate`, …) and UNII parent-relationship confirms | collapse |
 | `ester` | FSN contains `acetate`/`propionate`/`palmitate`/`decanoate`/… **and** the parent is not a counter-ion pattern | **no_collapse**, review |
-| `prodrug` | ATC-5 differs from parent, or an openFDA/DrugBank-Open flag, or a curated prodrug list | **no_collapse**, review |
+| `prodrug` | ATC-5 differs from parent, or GSRS registers a distinct active moiety, or a curated prodrug list | **no_collapse**, review |
 | `complex` | `ferric carboxymaltose`, `iron sucrose`, polyvalent-cation patterns | flagged, review |
 | `unknown` | anything else | blocked from band A; hard queue |
 
-RxNorm's `IN`/`PIN` split is an independent, human-curated opinion on this same
-question and is used as a cross-check: agreement raises confidence, disagreement
-(RxNorm calls it a distinct ingredient; SNOMED calls it a modification) is a
-strong ester/prodrug signal that blocks auto-collapse. See
-[12 §B2](12-terminology-tooling.md#b2-rxnorm-as-an-independent-check-on-the-riskiest-decision).
+**GSRS's `ACTIVE MOIETY` relationship is the independent cross-check** on this
+same question: agreement raises confidence, disagreement (GSRS registers a
+distinct substance where SNOMED asserts a modification) is a strong ester/prodrug
+signal that blocks auto-collapse. It is a regulatory substance determination,
+which makes it a stronger second opinion than a vocabulary convention would be.
+See [12 §B1](12-terminology-tooling.md#b1-why-rxnorm-was-proposed-and-why-gsrs-covers-it).
 
 This table is the operational form of [C4](11-challenges-to-the-brief.md#c4). The
 heuristics are imperfect *by design* — their job is to route work to the right
