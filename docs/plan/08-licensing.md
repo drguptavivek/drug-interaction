@@ -283,6 +283,138 @@ Why RxNorm's role grew: it may be the only available derivation of the
 SNOMED-side UNII anchor, and it provides an independent opinion on salt/moiety
 collapse. See [12 Part B](12-terminology-tooling.md#part-b--rxnorm).
 
+## 3.6 Affiliate licensing in practice: who needs one, and what it costs
+
+Source: SNOMED International's published Affiliate licensing guidance (as
+retrieved; store the text in `licence.retrieved_text` per [§1](#1-source-by-source-position)).
+
+### 3.6.1 India is a Member country — the licence is free
+
+Within India, the Affiliate Licence is **free of cost**, obtained from NRCeS.
+There is no fee to resolve, no Territory Band to look up, no invoice. The
+obligation is **registration and annual reporting**, not money. Fees arise only
+for use, deployment or distribution in **non-Member** countries, priced by the
+country's World Bank Territory Band; exemptions exist for low-income countries,
+development licences, qualifying research projects and humanitarian use.
+
+The rule that matters for architecture: **the licence follows where SNOMED CT is
+USED, not where it is hosted.** Hosting location is irrelevant.
+
+### 3.6.2 We are not SaaS, and that is a licensing advantage
+
+SNOMED International's guidance treats SaaS specially: a service offered to
+healthcare organisations as SaaS must be declared as such on MLDS, and is
+**charged per site** (clinic, hospital) where fees apply.
+
+This plan's architecture — a binary plus a signed data file, deployed and run by
+each institution, with no network dependency — is **not** SaaS. Each deploying
+institution is the user of SNOMED CT in its own right. Within India that means
+each is eligible for its own free Affiliate Licence from NRCeS, and no per-site
+fee arises anywhere.
+
+Worth noting because it was chosen for clinical and connectivity reasons
+([05](05-go-service.md)) and happens to be the cleaner licensing posture too. If
+anyone later proposes "simplify this into a hosted national DDI API", the
+licensing consequence — a SaaS declaration and per-site accounting — belongs in
+that discussion.
+
+### 3.6.3 The 2023 update: downstream systems do not need a licence
+
+The 2023 Affiliate Licence update clarifies what non-licensed systems may do:
+
+| Actor | Permitted |
+|---|---|
+| User of a **SNOMED-licensed** system | Transmit SNOMED codes **and descriptions** to any system, licensed or not — no restrictions |
+| User of a **non-licensed** system | **Receive** codes and descriptions; **store** them in their system and data repository; **forward** them to licensed and unlicensed systems |
+
+Two consequences, and the first corrects a position taken earlier in this plan:
+
+1. **Our API may return SNOMED descriptions to any consumer.** Earlier drafts were
+   cautious about putting FSN text in responses. Transmission of codes *and
+   descriptions* from a licensed system is unrestricted, so a finding may name a
+   substance using SNOMED text without imposing a licence obligation on the
+   caller. This is data flow in use.
+2. **It does not make publication unrestricted.** Receiving, storing and
+   forwarding codes in the course of use is different from *distributing the
+   terminology* — publishing a downloadable mapping file containing FSNs is
+   distribution and remains restricted. The `codes-only` build profile
+   ([§3.2](#32-consequence-for-kbddi)) is still the mechanism for anything
+   published for download.
+
+### 3.6.4 Where the boundary actually falls
+
+Four different things get conflated. They have different answers:
+
+| Activity | Example in this project | Licence needed? |
+|---|---|---|
+| **Creating** SNOMED-coded data — browsing the terminology and assigning codes | Our curation platform; the HMIS drug master coding exercise ([13 §5](13-hmis-neutral-integration.md#5-the-drug-master-coding-exercise)) | **Yes** — a Data Creation System |
+| **Deploying** software that contains SNOMED CT content | A site running `ddid` with a `full`-profile `kb.ddi` (SCTIDs + FSN snapshots) | **Yes** — this is deploying SNOMED CT |
+| **Deploying** software that holds only codes | A site running `ddid` with a `codes-only` `kb.ddi` (SCTIDs + *our* curated names) | **Probably not** — arguably just storing codes, per §3.6.3. **[Q29](10-open-questions.md#q29)** |
+| **Receiving, storing, forwarding** codes | An HMIS storing SCTIDs returned in a finding; a downstream record system | **No** — explicitly permitted |
+
+The third row is the one with real operational weight. AIIMS will hold an
+Affiliate Licence regardless, because it is doing the coding. But a rollout to
+hundreds of CHCs and PHCs — none of which code anything, they only run the
+binary — is a very different proposition if each needs its own registration
+versus none needing one.
+
+**This gives the `codes-only` profile a second, independent justification.** It
+was introduced to satisfy redistribution limits ([§3.2](#32-consequence-for-kbddi));
+it may also be what makes a large primary-care rollout administratively feasible.
+The design already supports both profiles, so the answer to
+[Q29](10-open-questions.md#q29) changes which profile primary care ships with, not
+the architecture.
+
+### 3.6.5 Annual Declaration of Use — a recurring obligation the plan had missed
+
+Affiliate licence holders must submit or renew a **Declaration of Use annually,
+by 15 January**, via MLDS (or via the NRC, for countries with their own
+distribution service — so **via NRCeS** for us). It must report:
+
+- current and planned use of SNOMED CT, and the purpose of use;
+- implementation status of the software;
+- **sublicensees and end users** (organisations or individuals);
+- **the number of software applications and workstations**;
+- the type of usage (data collection, evaluation, aggregation).
+
+This is a genuine recurring obligation and it has a design consequence. The
+service is deliberately offline with no telemetry and no phone-home, so
+deployment counts **cannot** be collected technically — and adding telemetry to
+collect them would breach the no-network principle for a purely administrative
+purpose. It must therefore be an **administrative deployment register**,
+maintained by the institutional owner:
+
+| Field | Why |
+|---|---|
+| Site name, type (tertiary / district / CHC / PHC), state | "End users" and site counts |
+| KB version and build profile (`full` / `codes-only`) deployed | Determines whether that site is deploying SNOMED content |
+| Number of workstations or service instances | Required reporting field |
+| Date deployed, date last updated | Implementation status |
+| Contact | Withdrawal notices ([02 §12](02-data-model.md#12-releases)) |
+
+The register does double duty: it is also the distribution list for a withdrawn
+release, which [05 §6](05-go-service.md#6-startup-validation) otherwise handles
+only by shipping a `withdrawn.txt` with each update — a mechanism that by
+definition cannot reach a site that never updates.
+
+**Ownership.** This lands on whoever takes handover ([Q19](10-open-questions.md#q19)).
+It is perhaps two hours a year, but a missed declaration is a licence compliance
+failure, not a paperwork slip. Added to the Phase 7 handover checklist and to the
+risk register as [R30](09-risks.md).
+
+### 3.6.6 If this ever leaves India
+
+Not in scope, but the rules are worth recording before someone offers the
+artifact informally to a neighbour:
+
+- **Another Member country** → a separate Affiliate Licence from *that* country's
+  NRC. Licences do not travel; multi-country use means multiple licences.
+- **A non-Member country** → a licence from SNOMED International, with a fee by
+  Territory Band, renewed annually. Exemptions may apply (low-income country,
+  humanitarian, qualifying research).
+- **Genuinely multi-country from the outset** → SNOMED International expects to
+  be contacted about a global licence.
+
 ## 6. What may be published openly
 
 | Artifact | Licence | Publishable |
@@ -291,6 +423,7 @@ collapse. See [12 Part B](12-terminology-tooling.md#part-b--rxnorm).
 | API specification (OpenAPI, CDS Hooks discovery) | CC BY 4.0 | **Yes** |
 | This plan and all design documentation | CC BY 4.0 | **Yes** |
 | `mapping_projection`, `codes-only` profile (our names + SCTIDs + DDInter IDs) | CC BY-NC-SA 4.0 | **Yes** — high reuse value for other Indian institutions |
+| SNOMED descriptions **returned in API responses** at runtime | n/a — transmission, not distribution | **Yes** — unrestricted from a licensed system, and the receiving system needs no licence of its own ([§3.6.3](#363-the-2023-update-downstream-systems-do-not-need-a-licence)) |
 | `mapping_projection`, `full` profile (with FSNs) | CC BY-NC-SA 4.0 + SNOMED affiliate terms | To affiliates |
 | Exception rules and their rationales | CC BY-NC-SA 4.0 | **Yes** — arguably the most valuable curated output |
 | Validation set (pairs + expectations, de-identified) | CC BY 4.0 | **Yes**, with departmental consent |

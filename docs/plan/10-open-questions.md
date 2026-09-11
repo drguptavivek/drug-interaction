@@ -163,6 +163,36 @@ If both hold, spoke B links to spoke A with no string matching at all — much
 stronger evidence than any name-similarity score. If either fails, R8 degrades
 to name matching and nothing else in the design changes.
 
+### Q29
+**Does a site that deploys only the `codes-only` KB need its own Affiliate
+Licence?**
+Blocks: the primary-care rollout model, not the build.
+Owner: Institutional legal + NRCeS.
+The 2023 Affiliate Licence update permits non-licensed systems to receive, store
+and forward SNOMED codes and descriptions. A CHC or PHC running `ddid` with a
+`codes-only` artifact holds SCTIDs and *our* curated names — no SNOMED
+descriptions, no terminology content. If that counts as storing codes rather than
+deploying SNOMED CT, a rollout to hundreds of primary-care sites needs **zero**
+registrations; if it counts as deployment, it needs one per site.
+
+Free either way in India, so this is administrative friction, not cost — but at
+several hundred sites the difference decides whether the rollout is feasible.
+**Ask NRCeS directly**; they are the authority and the question is squarely
+theirs. See [08 §3.6.4](08-licensing.md#364-where-the-boundary-actually-falls).
+Design is unaffected: both profiles already exist.
+
+### Q30
+**Who files the annual Declaration of Use, and is a deployment register being
+kept from the first deployment?**
+Blocks: Phase 7 handover; ongoing compliance.
+Owner: Institutional owner (same person as [Q19](#q19)).
+Due **15 January** each year via NRCeS, reporting purpose of use, implementation
+status, end users/sublicensees, and the **number of applications and
+workstations**. The service has no telemetry by design and must not acquire any
+for this, so the counts come from an administrative register that has to be
+maintained from day one — reconstructing it later is far harder.
+See [08 §3.6.5](08-licensing.md#365-annual-declaration-of-use--a-recurring-obligation-the-plan-had-missed).
+
 ## Blocking Phase 1
 
 ### Q8

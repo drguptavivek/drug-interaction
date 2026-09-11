@@ -34,6 +34,12 @@ The three documents that carry the most weight:
 These are settled decisions with reasoning recorded. Don't quietly reverse them;
 if one looks wrong, argue it against the document that sets it out.
 
+0. **India is a SNOMED Member country — the Affiliate Licence is free.** Nothing
+   here is blocked by SNOMED cost. The obligations are *registration* (via
+   NRCeS, gates Phase 2 — a non-Affiliate may not copy SCTIDs into a database)
+   and an **annual Declaration of Use, due 15 January**, which needs an
+   administrative deployment register. Do not solve the register with telemetry;
+   that would breach rule 5 for a paperwork purpose. (`08 §3.6`)
 1. **Never commit licensed source data.** The repo is public. SNOMED CT RF2,
    DDInter, RxNorm/UMLS and CredibleMeds content are each restricted in ways a
    public commit would breach. Sources are pinned by SHA-256 in `sources.lock`

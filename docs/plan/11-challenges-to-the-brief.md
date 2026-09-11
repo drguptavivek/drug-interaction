@@ -198,8 +198,17 @@ the design:
    ([04 §2](04-etl-pipeline.md#2-acquire--source-pinning)), which forces a human
    to look whenever an upstream source moves.
 
-The brief's posture survives; it just needs the formulary side named, and
-[Q19](10-open-questions.md#q19) answered.
+**A third thing the brief missed, and so did my first draft.** There *is* a
+mandatory recurring obligation, just not a technical one: the **annual
+Declaration of Use**, due 15 January via NRCeS, reporting end users, deployment
+counts and implementation status. It needs an administrative deployment register
+maintained from the first install — and explicitly *not* telemetry, which would
+breach the no-network principle to serve a paperwork need. See
+[08 §3.6.5](08-licensing.md#365-annual-declaration-of-use--a-recurring-obligation-the-plan-had-missed).
+
+So the brief's posture survives on the engineering question and needs three
+things named: the formulary side, the annual declaration, and an owner for both
+([Q19](10-open-questions.md#q19), [Q30](10-open-questions.md#q30)).
 
 **Severity: medium.**
 

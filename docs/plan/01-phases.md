@@ -48,6 +48,13 @@ This phase exists to kill the project cheaply if the sources do not support it.
 **Exit criteria**
 - [ ] Licence memo signed by institutional legal, naming what may and may not be
       redistributed, with the CC1/CC2/CC7 decisions in [11](11-challenges-to-the-brief.md) resolved.
+- [ ] **SNOMED International Affiliate Licence obtained via NRCeS** ([Q28](10-open-questions.md#q28)).
+      Free — India is a Member country — but it gates Phase 2, because a
+      non-Affiliate may not copy SCTIDs into a database, which is what the
+      curation platform does.
+- [ ] **[Q29](10-open-questions.md#q29) asked of NRCeS**: does a `codes-only` deployment need
+      its own site licence? Decides whether a primary-care rollout needs zero
+      registrations or one per site.
 - [ ] Coverage census shows ≥ 85% DDInter coverage of the high-volume stratum
       and ≥ 70% of the NTI/QT stratum. Below that, the project changes shape
       (see "Stop conditions" below).
@@ -271,3 +278,9 @@ contact — that dependency was removed by the HMIS-neutral decision
       its own overlay.
 - [ ] Named maintainer, documented quarterly re-census procedure
       ([C6](11-challenges-to-the-brief.md#c6)).
+- [ ] **Deployment register live**, with both pilot sites recorded: site type,
+      KB version, build profile, workstation count, contact. It is the source for
+      the annual Declaration of Use *and* the distribution list for a withdrawn
+      release ([08 §3.6.5](08-licensing.md#365-annual-declaration-of-use--a-recurring-obligation-the-plan-had-missed)).
+- [ ] **Named owner for the annual Declaration of Use**, due 15 January via
+      NRCeS ([Q30](10-open-questions.md#q30)).
