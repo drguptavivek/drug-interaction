@@ -9,6 +9,9 @@ connectivity.
 **This repository currently contains a plan, not an implementation.** No
 production code has been written. The documents below are the deliverable.
 
+**Resuming work?** Start with [HANDOFF.md](HANDOFF.md) — where the last session
+got to and what to do next. [CLAUDE.md](CLAUDE.md) holds the standing rules.
+
 ## Read in this order
 
 | # | Document | What it answers |

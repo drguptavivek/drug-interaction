@@ -9,13 +9,17 @@ CHCs and PHCs with different formularies and no reliable connectivity.
 Non-commercial; government and academic deployment only.
 
 **Current state: plan only. No production code has been written yet.** The
-deliverable so far is `README.md` plus `docs/plan/00`–`13`. Start there before
+deliverable so far is `README.md` plus `docs/plan/00`–`16`. Start there before
 proposing anything.
+
+**Resuming work? Read [`HANDOFF.md`](HANDOFF.md) first** — where the last session
+got to, what to do next, and what not to quietly undo.
 
 ## Repository map
 
 ```
 README.md                 index + headline conclusions
+HANDOFF.md                where the last session got to; pick up here
 docs/plan/00–16           the plan (see README table)
 snomed-releases/          LOCAL ONLY — licensed release archives, gitignored
 .gitignore                a compliance control; read the comment at the top
@@ -25,7 +29,7 @@ The three documents that carry the most weight:
 
 | Doc | Why it matters |
 |---|---|
-| `docs/plan/11-challenges-to-the-brief.md` | Twelve constraints in the original brief I argued are mistakes, with reasons. Read before re-proposing any of them. |
+| `docs/plan/11-challenges-to-the-brief.md` | Twelve constraints in the original brief I argued are mistakes — **eleven stand, C3 is withdrawn because I was wrong.** Read before re-proposing any of them. |
 | `docs/plan/08-licensing.md` | What may and may not be published. This repo is **public**. |
 | `docs/plan/10-open-questions.md` | Q1–Q32. Several are Phase 0 gates; **Q22 has no fallback now that RxNorm is dropped**. |
 
